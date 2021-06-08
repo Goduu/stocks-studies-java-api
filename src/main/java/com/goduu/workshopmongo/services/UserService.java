@@ -1,5 +1,6 @@
 package com.goduu.workshopmongo.services;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,6 +48,7 @@ public class UserService implements UserDetailsService {
 	}
 
 	public User register(User obj) {
+		obj.getRoles().add("user");
 		return repo.insert(obj);
 	}
 
@@ -68,11 +70,9 @@ public class UserService implements UserDetailsService {
 
 	public User fromRegistryDTO(UserRegistryDTO objDto) {
 		User user = new User();
-		System.out
-				.println("user------------------------" + objDto.getEmail() + objDto.getName() + objDto.getPassword());
 		user.setName(objDto.getName());
 		user.setEmail(objDto.getEmail());
-		user.setHashedpw(passwordEncoder.encode(objDto.getPassword()));
+		user.setPassword(passwordEncoder.encode(objDto.getPassword()));
 
 		return user;
 	}
@@ -85,24 +85,26 @@ public class UserService implements UserDetailsService {
 	 * @param password - user password
 	 * @param results  - map to collect any relevant message
 	 * @return User object that matches the provided email and password.
+	 * @throws UnsupportedEncodingException
 	 */
-	public User authenticate(String email, String password, Map<String, String> results) {
+	public User authenticate(String email, String password, Map<String, String> results) throws UnsupportedEncodingException {
 		String jwt = generateUserToken(email, password);
-		if (!userDao.createUserSession(email, jwt)) {
-			results.put("msg", "unable to login user");
-			return null;
-		}
-		results.put("auth_token", jwt);
-		return userDao.getUser(email);
+		// if (!userDao.createUserSession(email, jwt)) {
+		// 	results.put("msg", "unable to login user");
+		// 	return null;
+		// }
+		results.put("authToken", jwt);
+		return repo.findUserByEmail(email);
 	}
 
 	public User findUserByName(String name) {
 		return repo.findUserByName(name);
 	}
 
-	private String generateUserToken(String email, String password) {
+	private String generateUserToken(String email, String password) throws UnsupportedEncodingException {
+		UsernamePasswordAuthenticationToken usat = new UsernamePasswordAuthenticationToken(email, password);
 		Authentication authentication = authenticationManager
-				.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+				.authenticate(usat);
 		return authService.generateToken(authentication);
 	}
 
@@ -115,4 +117,11 @@ public class UserService implements UserDetailsService {
 		return UserPrincipal.create(user);
 
 	}
+
+
+	
+    // if (!passwordEncoder.matches(password, hpwd)) {
+	// 	results.put("msg", "passwords do not match");
+	// 	return false;
+	//   }
 }

@@ -1,6 +1,8 @@
 package com.goduu.workshopmongo.models;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -28,8 +30,10 @@ public class User implements Serializable {
 	private String name;
 	
 	private String email;
-
-	@JsonIgnore private String hashedpw;
+	
+	private List<String> roles = new ArrayList<>();
+	// @JsonIgnore
+	private String password;
 
 	// @DBRef(lazy = true)
 	// private List<Post> posts = new ArrayList<>();

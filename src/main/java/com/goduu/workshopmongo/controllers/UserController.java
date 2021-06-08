@@ -1,10 +1,13 @@
 package com.goduu.workshopmongo.controllers;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpSession;
 
 import com.goduu.workshopmongo.dto.AuthDTO;
 import com.goduu.workshopmongo.dto.UserDTO;
@@ -54,17 +57,47 @@ public class UserController {
 		return ResponseEntity.created(uri).build();
 	}
 
+	private ResponseEntity buildSuccess(String authToken, User user) {
+		Map response = new HashMap<String, Object>();
+		response.put("authToken", authToken);
+		response.put("info", user);
+		return ResponseEntity.ok().body(response);
+	}
+
+	/**
+	 * Authenticates the user by generationg a jwt token, counting the number 
+	 * of users logged in and returning for the user the token and user infos
+	 *
+	 * @param login    - email and password of the user
+	 * @param session  - sprin session control for counting users
+	 * @return authToken with the jwt token and user infos
+	 * @throws UnsupportedEncodingException
+	 */
 	@PostMapping("/login")
-	public ResponseEntity authenticateUser(@RequestBody AuthDTO login) {
+	public ResponseEntity authenticateUser(@RequestBody AuthDTO login, HttpSession session) throws UnsupportedEncodingException {
+
+		Integer counter = (Integer) session.getAttribute("count");
+
+		if (counter == null) {
+			counter = 1;
+		} else {
+			counter++;
+		}
+
+		session.setAttribute("count", counter);
 
 		Map<String, String> results = new HashMap<>();
 
-		User user = service.authenticate(login.getName(), login.getPassword(), results);
+		System.out.println("*********** jwt1");
+		
+		User user = service.authenticate(login.getEmail(), login.getPassword(), results);
 		if (user == null) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(results);
 		}
+		System.out.println("*********** jwt2" + user.getEmail());
 
-		return buildSuccess(results.get("auth_token"), user);
+		return buildSuccess(results.get("authToken"), user);
+
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)

@@ -1,7 +1,15 @@
 package com.goduu.workshopmongo.services;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import static java.util.Collections.emptyList;
+
+import java.io.UnsupportedEncodingException;
+import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.goduu.workshopmongo.models.User;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,14 +18,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.nelioalves.workshopmongo.models.UserPrincipal;
-
-import java.util.Date;
-
-import static java.util.Collections.emptyList;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
 @Service
 @Configuration
@@ -81,9 +83,10 @@ public class TokenAuthenticationService {
     return null;
   }
 
-  public String generateToken(Authentication authentication) {
+  public String generateToken(Authentication authentication) throws UnsupportedEncodingException {
 
-    UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+    System.out.println("AUTH ----------------" + authentication.getPrincipal());
+    User userPrincipal = (User) authentication.getPrincipal();
 
     Date now = new Date();
     Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);

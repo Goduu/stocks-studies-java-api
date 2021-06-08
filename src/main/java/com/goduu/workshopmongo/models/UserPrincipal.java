@@ -36,13 +36,19 @@ public class UserPrincipal implements UserDetails {
     this.authorities = authorities;
   }
 
+  public UserPrincipal(User user){
+    name = user.getName();
+    email = user.getEmail();
+    password = user.getPassword();
+  }
+
   public static UserPrincipal create(User user) {
     return new UserPrincipal(
         (long) 1,
         user.getName(),
         user.getEmail(),
         user.getEmail(),
-        user.getHashedpw(),
+        user.getPassword(),
         new ArrayList<>());
   }
 
