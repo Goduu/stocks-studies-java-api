@@ -25,7 +25,7 @@ public class GridController {
 
 	@RequestMapping(value = "/{userId}", method = RequestMethod.GET)
 	public ResponseEntity<List<GridDTO>> findAllByUser(@PathVariable String userId) {
-		List<Grid> list = service.findAllByUser(userId);
+		List<Grid> list = service.findAllByUserId(userId);
 		List<GridDTO> listDto = list.stream().map(x -> new GridDTO(x)).collect(Collectors.toList());
 		return ResponseEntity.ok().body(listDto);
 	}
@@ -37,9 +37,10 @@ public class GridController {
 	}
 	
 	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-	public ResponseEntity<Void> update(@PathVariable String id, @RequestBody UserRegistryDTO objDto) {
-		// service.update(id);
-		return ResponseEntity.noContent().build();
+	public ResponseEntity<String> update(@PathVariable String id, @RequestBody GridDTO objDto) {
+		Grid obj = service.fromRegistryDTO(objDto);
+		Grid res = service.update(obj);
+		return ResponseEntity.ok().body(res.getId());
 	}
 	
 

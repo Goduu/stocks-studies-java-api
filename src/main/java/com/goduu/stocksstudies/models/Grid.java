@@ -25,11 +25,13 @@ public class Grid implements Serializable{
     @Id
     private String id;
     // @DBRef(lazy = true)
-	private User user;
+	private String userId;
 
     private String identifier;
 
     private List<Map<String, Object>> gridElements = new ArrayList<>();
+
+    private Boolean active;
 
     
 }

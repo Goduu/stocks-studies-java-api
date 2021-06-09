@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface GridRepository extends MongoRepository<Grid, String> {
 
-    List<Grid> findAllByUser(String userId);
+    List<Grid> findAllByUserId(String userId);
 
 }

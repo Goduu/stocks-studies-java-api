@@ -26,7 +26,7 @@ public class GridDTO implements Serializable {
   // @DBRef(lazy = true)
   @NotNull(message = "Error - grid not related to a user")
   @Size(min = 3, message = "`name` must be at least 3 characters long")
-  private User user;
+  private String userId;
 
   @NotNull(message = "Error - grid not related to a identifier")
   private String identifier;
@@ -35,7 +35,7 @@ public class GridDTO implements Serializable {
 
   public GridDTO(Grid obj) {
     id = obj.getId();
-    user = obj.getUser();
+    userId = obj.getUserId();
     identifier = obj.getIdentifier();
     gridElements = obj.getGridElements();
   }
