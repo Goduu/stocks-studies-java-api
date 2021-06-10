@@ -33,11 +33,14 @@ public class GridDTO implements Serializable {
 
   private List<Map<String, Object>> gridElements = new ArrayList<>();
 
+  private Boolean active;
+
   public GridDTO(Grid obj) {
     id = obj.getId();
     userId = obj.getUserId();
     identifier = obj.getIdentifier();
     gridElements = obj.getGridElements();
+    active = obj.getActive();
   }
 
 }

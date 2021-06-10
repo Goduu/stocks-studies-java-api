@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.goduu.stocksstudies.services.StockDataService;
+import com.google.gson.JsonObject;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

@@ -52,7 +52,11 @@ public class GridService {
 				return repo.save(obj.get());
 			}
 		} else {
-			return repo.insert(grid);
+			Optional<Grid> obj = repo.findAllByUserIdAndIdentifier(grid.getUserId(), grid.getIdentifier());
+			if (!obj.isPresent()) {
+				grid.setActive(true);
+				return repo.insert(grid);
+			}
 		}
 		return null;
 
