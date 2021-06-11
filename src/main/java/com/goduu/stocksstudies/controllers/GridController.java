@@ -30,6 +30,12 @@ public class GridController {
 		return ResponseEntity.ok().body(listDto);
 	}
 
+	@RequestMapping(value = "/{userId}/tickers", method = RequestMethod.GET)
+	public ResponseEntity<List<String>> findAllIdentifiersByUser(@PathVariable String userId) {
+		List<String> list = service.findAllIdentifiersByUser(userId);
+		return ResponseEntity.ok().body(list);
+	}
+
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	public ResponseEntity<Void> delete(@PathVariable String id) {
 		service.delete(id);

@@ -2,6 +2,7 @@ package com.goduu.stocksstudies.services;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.goduu.stocksstudies.dto.GridDTO;
 import com.goduu.stocksstudies.models.Grid;
@@ -21,6 +22,12 @@ public class GridService {
 
 	public List<Grid> findAllByUserId(String userId) {
 		return repo.findAllByUserId(userId);
+	}
+	
+	public List<String> findAllIdentifiersByUser(String userId) {
+		List<Grid> gridList = repo.findAllIdentifiersByUser(userId);
+		return gridList.stream().map(g ->  g.getIdentifier()).collect(Collectors.toList());
+
 	}
 
 	public Grid findById(String id) {

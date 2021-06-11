@@ -23,6 +23,9 @@ public class TickerController {
 
 	@RequestMapping(value = "/{exchange}/{search}", method = RequestMethod.GET)
 	public ResponseEntity<List<TickerDTO>> findAllByDescriptionAndTickerAndExchange(@PathVariable String search,@PathVariable String exchange) {
+		if(search.equals("-all-")){
+			search = ".";
+		}
 		List<Ticker> list = service.findAllByDescriptionAndTickerAndExchange(search, exchange);
 		List<TickerDTO> listDto = list.stream().map(x -> new TickerDTO(x)).collect(Collectors.toList());
 		return ResponseEntity.ok().body(listDto);

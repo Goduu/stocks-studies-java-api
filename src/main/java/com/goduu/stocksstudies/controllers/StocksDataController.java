@@ -3,12 +3,14 @@ package com.goduu.stocksstudies.controllers;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.goduu.stocksstudies.dto.ChartDataDTO;
 import com.goduu.stocksstudies.services.StockDataService;
 import com.google.gson.JsonObject;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,17 +41,18 @@ public class StocksDataController {
 
 	}
     
-    @RequestMapping(value = "/priceHistory/{ticker}", method = RequestMethod.GET)
-	public ResponseEntity<Map<String,Object>> getPriceHistory(@PathVariable String ticker) throws IOException, java.io.IOException {
+    @RequestMapping(value = "/priceHistory", method = RequestMethod.POST)
+	public ResponseEntity<Map<String,Object>> getPriceHistory(@RequestBody ChartDataDTO objDto) throws IOException, java.io.IOException {
 
-        return ResponseEntity.ok().body(service.getPriceHistory(ticker, 365, "DAY", "WEEKLY"));
+        return ResponseEntity.ok().body(service.getPriceHistory(objDto));
 		
     }
     
-	@RequestMapping(value = "/dividendHistory/{ticker}", method = RequestMethod.GET)
-	public ResponseEntity<Map<String,Object>> getDividendHistory(@PathVariable String ticker) throws IOException, java.io.IOException {
+	
+	@RequestMapping(value = "/dividendHistory", method = RequestMethod.POST)
+	public ResponseEntity<Map<String,Object>> getDividendHistory(@RequestBody ChartDataDTO objDto) throws IOException, java.io.IOException {
 
-        return ResponseEntity.ok().body(service.getDividendHistory(ticker, 365, "DAY"));
+        return ResponseEntity.ok().body(service.getDividendHistory(objDto));
 
     }
 

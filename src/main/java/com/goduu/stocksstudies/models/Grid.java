@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.constraints.NotNull;
+
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
@@ -23,8 +25,10 @@ public class Grid implements Serializable{
 
     private String id;
     // @DBRef(lazy = true)
+    @NotNull
 	private String userId;
-
+    
+    @NotNull
     private String identifier;
 
     private List<Map<String, Object>> gridElements = new ArrayList<>();

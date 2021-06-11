@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.goduu.stocksstudies.dto.ChartDataDTO;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
@@ -104,17 +105,17 @@ public class StockDataService {
 
     }
 
-    public Map<String,Object> getPriceHistory(String ticker, int amount, String period, String granularity) throws IOException{
+    public Map<String,Object> getPriceHistory(ChartDataDTO objDto) throws IOException{
         
-        Stock stock = YahooFinance.get(ticker);
+        Stock stock = YahooFinance.get(objDto.getTicker());
 
         Map<String,Object> res = new HashMap<>();
 
-        Interval calendarGranularity = ((granularity.equals("MONTLY")) ? MONTHLY : (granularity.equals("DAILY")) ? DAILY : WEEKLY);
-        int calendarPeriod = ((period.equals("MONTH")) ? MONTH : (period.equals("DAY")) ? DAY : YEAR);
+        Interval calendarGranularity = ((objDto.getGranularity().equals("MONTLY")) ? MONTHLY : (objDto.getGranularity().equals("DAILY")) ? DAILY : WEEKLY);
+        int calendarPeriod = ((objDto.getPeriod().equals("MONTH")) ? MONTH : (objDto.getPeriod().equals("DAY")) ? DAY : YEAR);
         Calendar to = Calendar.getInstance();
         Calendar from = Calendar.getInstance();
-        from.add(calendarPeriod, -amount);
+        from.add(calendarPeriod, -objDto.getAmount());
 
         res.put("PriceHistory", stock.getHistory(from, to, calendarGranularity));
 
@@ -122,16 +123,16 @@ public class StockDataService {
 
     }
 
-    public Map<String,Object> getDividendHistory(String ticker, int amount, String period) throws IOException{
+    public Map<String,Object> getDividendHistory(ChartDataDTO objDto) throws IOException{
         
-        Stock stock = YahooFinance.get(ticker);
+        Stock stock = YahooFinance.get(objDto.getTicker());
 
         Map<String,Object> res = new HashMap<>();
 
-        int calendarPeriod = ((period.equals("MONTH")) ? MONTH : (period.equals("DAY")) ? DAY : YEAR);
+        int calendarPeriod = ((objDto.getPeriod().equals("MONTH")) ? MONTH : (objDto.getPeriod().equals("DAY")) ? DAY : YEAR);
         Calendar to = Calendar.getInstance();
         Calendar from = Calendar.getInstance();
-        from.add(calendarPeriod, -amount);
+        from.add(calendarPeriod, -objDto.getAmount());
 
         res.put("PriceHistory", stock.getDividendHistory(from, to));
 
