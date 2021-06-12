@@ -7,6 +7,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
@@ -29,6 +30,7 @@ public class User implements Serializable {
 	
 	private String name;
 	
+	@Indexed(unique = true)
 	private String email;
 	
 	private List<String> roles = new ArrayList<>();

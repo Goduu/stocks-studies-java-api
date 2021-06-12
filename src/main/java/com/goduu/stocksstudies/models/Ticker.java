@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
@@ -32,6 +33,7 @@ public class Ticker implements Serializable {
 
 	private String exchange;
 	
+	@Indexed(unique = true)
 	private String ticker;
 	
 	private String type;

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
@@ -19,6 +20,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document
+@CompoundIndex(name = "user_ident_indx", def = "{'userId': 1, 'identifier': 1}")
 public class Grid implements Serializable{
 
 	private static final long serialVersionUID = 1L;

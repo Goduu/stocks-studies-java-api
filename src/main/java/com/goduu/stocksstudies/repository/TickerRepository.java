@@ -5,23 +5,25 @@ import java.util.List;
 
 import com.goduu.stocksstudies.models.Ticker;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TickerRepository extends MongoRepository<Ticker, String> {    
-
-    @Query("{                                                 "+
-            " '$and':[{                                       "+
-            "     '$or': [{'ticker':{'$regex': ?0}},          "+
-            "         {'description':{'$regex': ?0}}]         "+
-            "    },                                           "+
-            "     {'exchange': ?1}                            "+
-            "     ]                                           "+
-            "},                                               "+ 
+        // "{'username': {$regex: ?0 }})"
+    @Query("{                                                                   "+
+            " '$and':[{                                                         "+
+            "     '$or': [{'ticker':{'$regex': ?0, '$options' : 'i'}},          "+
+            "         {'description':{'$regex': ?0, '$options' : 'i'}}]         "+
+            "    },                                                             "+
+            "     {'exchange': { '$in': ?1}}                                              "+
+            "     ]                                                             "+
+            "},                                                                 "+ 
             "{'ticker': 1,'description':1, '_id': 0}")
-    List<Ticker> findAllByDescriptionAndTickerAndExchange(String search, String exchange);
+    Page<Ticker> findAllByDescriptionAndTickerAndExchange(String search, List<String> exchange, Pageable pageable);
 
     
 		// return dumps(db.tickers

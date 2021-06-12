@@ -90,16 +90,16 @@ public class StockDataService {
         JsonObject summary = getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"+ticker+"?modules=summaryProfile");
         JsonObject qs = summary.getAsJsonObject("quoteSummary");
         JsonObject results = qs.get("result").getAsJsonArray().get(0).getAsJsonObject().get("summaryProfile").getAsJsonObject();
-        res.put("website", results.get("website").getAsString());
-        res.put("industry", results.get("industry").getAsString());
-        res.put("sector", results.get("sector").getAsString());
-        res.put("longBusinessSummary", results.get("longBusinessSummary").getAsString());
+        res.put("website", results.get("website") != null ? results.get("website").getAsString() : "" );
+        res.put("industry", results.get("industry") != null ? results.get("industry").getAsString() : "");
+        res.put("sector", results.get("sector") != null ? results.get("sector").getAsString() : "");
+        res.put("longBusinessSummary", results.get("longBusinessSummary") != null ? results.get("longBusinessSummary").getAsString() : "");
         summary = getJsonFromURL("https://query1.finance.yahoo.com/v7/finance/quote?symbols="+ticker);
         results = summary.getAsJsonObject("quoteResponse").get("result").getAsJsonArray().get(0).getAsJsonObject();
-        res.put("fullExchangeName", results.get("fullExchangeName").getAsString());
-        res.put("currency", results.get("currency").getAsString());
-        res.put("longName", results.get("longName").getAsString());
-        res.put("price", results.get("regularMarketPrice").getAsBigDecimal());
+        res.put("fullExchangeName", results.get("fullExchangeName") != null ? results.get("fullExchangeName").getAsString() : "");
+        res.put("currency", results.get("currency") != null ? results.get("currency").getAsString() : "");
+        res.put("longName", results.get("longName") != null ? results.get("longName").getAsString() : "");
+        res.put("price", results.get("regularMarketPrice") != null ? results.get("regularMarketPrice").getAsBigDecimal() : "");
 
         return res;
 
