@@ -3,6 +3,7 @@ package com.goduu.stocksstudies.models;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -40,6 +41,7 @@ public class User implements Serializable {
 	// @DBRef(lazy = true)
 	// private List<Post> posts = new ArrayList<>();
 
+	private Map<String, String> avatar;
 
 	@Override
 	public int hashCode() {

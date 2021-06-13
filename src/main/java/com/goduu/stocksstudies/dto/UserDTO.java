@@ -1,6 +1,7 @@
 package com.goduu.stocksstudies.dto;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
@@ -22,22 +23,19 @@ public class UserDTO implements Serializable {
 
 	private String id;
 
-	@NotNull(message = "`name` field is mandatory")
-  	@Size(min = 3, message = "`name` must be at least 3 characters long")
 	private String name;
 
-	@NotNull(message = "`email` field is mandatory")
-  	@Email(message = "`email` must be an well-formed email address")
 	private String email;
 
-	@NotNull(message = "`password` field is mandatory")
-	@Size(min = 8, message = "`password` must be at least 8 characters long")
 	private String password;
+
+	private Map<String, String> avatar;
 	
 	public UserDTO(User obj) {
 		id = obj.getId();
 		name = obj.getName();
 		email = obj.getEmail();
+		avatar = obj.getAvatar();
 	}
 
 

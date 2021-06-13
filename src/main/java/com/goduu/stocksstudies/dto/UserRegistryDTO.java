@@ -1,5 +1,7 @@
 package com.goduu.stocksstudies.dto;
 
+import java.util.Map;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -26,5 +28,8 @@ public class UserRegistryDTO {
   @NotNull(message = "`password` field is mandatory")
   @Size(min = 8, message = "`password` must be at least 8 characters long")
   private String password;
+
+  private Map<String, String> avatar;
+  
 
 }

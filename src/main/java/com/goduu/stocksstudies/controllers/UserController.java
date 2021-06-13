@@ -103,10 +103,8 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-	public ResponseEntity<Void> update(@RequestBody UserRegistryDTO objDto, @PathVariable String id) {
-		User obj = service.fromRegistryDTO(objDto);
-		obj.setId(id);
-		obj = service.update(obj);
+	public ResponseEntity<Void> update(@RequestBody UserDTO objDto, @PathVariable String id) {
+		service.update(objDto);
 		return ResponseEntity.noContent().build();
 	}
 

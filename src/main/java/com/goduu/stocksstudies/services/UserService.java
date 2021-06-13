@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.goduu.stocksstudies.dto.UserDTO;
 import com.goduu.stocksstudies.dto.UserRegistryDTO;
 import com.goduu.stocksstudies.models.User;
 import com.goduu.stocksstudies.models.UserPrincipal;
@@ -62,10 +63,23 @@ public class UserService implements UserDetailsService {
 		updateData(newObj, obj);
 		return repo.save(newObj);
 	}
+	
+	public User update(UserDTO obj) {
+		User newObj = findById(obj.getId());
+		updateData(obj,newObj);
+		return repo.save(newObj);
+	}
 
 	private void updateData(User newObj, User obj) {
 		newObj.setName(obj.getName());
 		newObj.setEmail(obj.getEmail());
+		newObj.setAvatar(obj.getAvatar());
+	}
+
+	private void updateData(UserDTO obj, User newObj) {
+		newObj.setName(obj.getName());
+		newObj.setEmail(obj.getEmail());
+		newObj.setAvatar(obj.getAvatar());
 	}
 
 	public User fromRegistryDTO(UserRegistryDTO objDto) {
@@ -73,6 +87,25 @@ public class UserService implements UserDetailsService {
 		user.setName(objDto.getName());
 		user.setEmail(objDto.getEmail());
 		user.setPassword(passwordEncoder.encode(objDto.getPassword()));
+		user.setAvatar(objDto.getAvatar());
+
+		return user;
+	}
+
+	public User fromDTO(UserDTO objDto) {
+		User user = new User();
+		if (objDto.getName() != null) {
+			user.setName(objDto.getName());
+		}
+		if (objDto.getEmail() != null) {
+			user.setEmail(objDto.getEmail());
+		}
+		if (objDto.getPassword() != null) {
+			user.setPassword(passwordEncoder.encode(objDto.getPassword()));
+		}
+		if(user.getAvatar() != null) {
+			user.setAvatar(objDto.getAvatar());
+		}
 
 		return user;
 	}
@@ -87,11 +120,12 @@ public class UserService implements UserDetailsService {
 	 * @return User object that matches the provided email and password.
 	 * @throws UnsupportedEncodingException
 	 */
-	public User authenticate(String email, String password, Map<String, String> results) throws UnsupportedEncodingException {
+	public User authenticate(String email, String password, Map<String, String> results)
+			throws UnsupportedEncodingException {
 		String jwt = generateUserToken(email, password);
 		// if (!userDao.createUserSession(email, jwt)) {
-		// 	results.put("msg", "unable to login user");
-		// 	return null;
+		// results.put("msg", "unable to login user");
+		// return null;
 		// }
 		results.put("authToken", jwt);
 		return repo.findUserByEmail(email);
@@ -103,8 +137,7 @@ public class UserService implements UserDetailsService {
 
 	private String generateUserToken(String email, String password) throws UnsupportedEncodingException {
 		UsernamePasswordAuthenticationToken usat = new UsernamePasswordAuthenticationToken(email, password);
-		Authentication authentication = authenticationManager
-				.authenticate(usat);
+		Authentication authentication = authenticationManager.authenticate(usat);
 		return authService.generateToken(authentication);
 	}
 
@@ -118,10 +151,8 @@ public class UserService implements UserDetailsService {
 
 	}
 
-
-	
-    // if (!passwordEncoder.matches(password, hpwd)) {
-	// 	results.put("msg", "passwords do not match");
-	// 	return false;
-	//   }
+	// if (!passwordEncoder.matches(password, hpwd)) {
+	// results.put("msg", "passwords do not match");
+	// return false;
+	// }
 }

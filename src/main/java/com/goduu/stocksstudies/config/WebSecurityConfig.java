@@ -66,8 +66,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
       @Override
       public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
-        System.out.println("--------------------------------" + authentication.getCredentials()
-            + authentication.getName() + authentication.getDetails());
         User user = userRepository.findUserByEmail(authentication.getName());
 
 
