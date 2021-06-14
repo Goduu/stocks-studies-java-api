@@ -9,7 +9,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.goduu.stocksstudies.models.Grid;
-import com.goduu.stocksstudies.models.User;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.goduu.stocksstudies.dto.GridDTO;
-import com.goduu.stocksstudies.dto.UserRegistryDTO;
 import com.goduu.stocksstudies.models.Grid;
 import com.goduu.stocksstudies.services.GridService;
 

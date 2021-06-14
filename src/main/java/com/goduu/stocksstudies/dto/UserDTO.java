@@ -3,10 +3,6 @@ package com.goduu.stocksstudies.dto;
 import java.io.Serializable;
 import java.util.Map;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import com.goduu.stocksstudies.models.User;
 
 import lombok.AllArgsConstructor;

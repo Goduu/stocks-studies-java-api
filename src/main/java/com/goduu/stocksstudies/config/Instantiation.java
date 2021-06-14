@@ -1,14 +1,8 @@
 package com.goduu.stocksstudies.config;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.TimeZone;
 
-import com.goduu.stocksstudies.dto.AuthDTO;
-import com.goduu.stocksstudies.dto.CommentDTO;
-import com.goduu.stocksstudies.models.Post;
-import com.goduu.stocksstudies.models.Ticker;
-import com.goduu.stocksstudies.models.User;
 import com.goduu.stocksstudies.repository.PostRepository;
 import com.goduu.stocksstudies.repository.UserRepository;
 

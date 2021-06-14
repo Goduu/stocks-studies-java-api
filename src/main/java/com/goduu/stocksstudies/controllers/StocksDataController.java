@@ -1,11 +1,11 @@
 package com.goduu.stocksstudies.controllers;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.goduu.stocksstudies.dto.ChartDataDTO;
 import com.goduu.stocksstudies.services.StockDataService;
-import com.google.gson.JsonObject;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +55,12 @@ public class StocksDataController {
         return ResponseEntity.ok().body(service.getDividendHistory(objDto));
 
     }
+
+	@RequestMapping(value = "/getStocksPrices", method = RequestMethod.POST)
+	public ResponseEntity<Map<String,BigDecimal>> getStocksPrices(@RequestBody String[] tickers) throws IOException, java.io.IOException {
+		
+		return ResponseEntity.ok().body(service.getStocksPrices(tickers));
+	}
 
 
     @RequestMapping(value = "/test/{ticker}", method = RequestMethod.GET)
