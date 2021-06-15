@@ -4,8 +4,10 @@ import java.util.List;
 
 import com.goduu.stocksstudies.models.Operation;
 import com.goduu.stocksstudies.services.OperationService;
+import com.goduu.stocksstudies.services.OperationService.OperationNotAllowedException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,9 +36,14 @@ public class OperationController {
 	}
 
 	@RequestMapping(value = "/registerOperation", method = RequestMethod.POST)
-	public ResponseEntity<Operation> registerOperation(@RequestBody Operation objDto) {
-		Operation obj = service.registerOperation(objDto);
-		return ResponseEntity.ok().body(obj);
+	public ResponseEntity registerOperation(@RequestBody Operation objDto) throws OperationNotAllowedException {
+		try{
+			Operation obj = service.registerOperation(objDto);
+			return ResponseEntity.ok().body(obj);
+		} catch (OperationNotAllowedException e) {
+			return ResponseEntity.status(HttpStatus.PRECONDITION_REQUIRED).body(e.getMessage());
+
+		}
 	}
 
 	@RequestMapping(value = "/update", method = RequestMethod.PUT)

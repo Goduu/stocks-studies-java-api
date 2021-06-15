@@ -6,10 +6,8 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.goduu.stocksstudies.dto.ChartDataDTO;
@@ -24,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
+import yahoofinance.histquotes.HistoricalQuote;
 import yahoofinance.histquotes.Interval;
 
 @Service
@@ -76,6 +75,20 @@ public class StockDataService {
         }
         return res;
     }
+    
+    // public Map<String,Object> getStocksCurves(String[] tickers) throws IOException{
+    //     Map<String,HistoricalQuote> res = new HashMap<>();
+    //     Map<String, Stock> stocks = YahooFinance.get(tickers, true);
+        
+    //     Calendar from = Calendar.getInstance();
+    //     Calendar to = Calendar.getInstance();
+    //     from.add(Calendar.YEAR, -5);
+
+    //     for (Map.Entry<String, Stock> entry : stocks.entrySet()) {
+    //         res.put(entry.getKey(), entry.getValue().getHistory());
+    //     }
+    //     return res;
+    // }
 
     public JsonObject getJsonFromURL(String sUrl) throws JsonIOException, JsonSyntaxException, IOException {
         // Connect to the URL using java's native library

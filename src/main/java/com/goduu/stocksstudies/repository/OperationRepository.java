@@ -13,4 +13,5 @@ public interface OperationRepository extends MongoRepository<Operation, String> 
 
     Optional<List<Operation>> findAllByUserId(String userId);
     
+    Optional<List<Operation>> findAllByUserIdAndAsset(String userId, String asset);
 }
