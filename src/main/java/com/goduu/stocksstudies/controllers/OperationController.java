@@ -1,7 +1,9 @@
 package com.goduu.stocksstudies.controllers;
 
+import java.io.IOException;
 import java.util.List;
 
+import com.goduu.stocksstudies.dto.PortifolioDTO;
 import com.goduu.stocksstudies.models.Operation;
 import com.goduu.stocksstudies.services.OperationService;
 import com.goduu.stocksstudies.services.OperationService.OperationNotAllowedException;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import yahoofinance.histquotes.HistoricalQuote;
 
 @RestController
 @RequestMapping(value = "/api/operation")
@@ -33,6 +37,18 @@ public class OperationController {
 	public ResponseEntity<Void> delete(@PathVariable String id) {
 		service.delete(id);
 		return ResponseEntity.noContent().build();
+	}
+	
+	@RequestMapping(value = "/getCurrentPortifolio/{userId}", method = RequestMethod.GET)
+	public ResponseEntity<PortifolioDTO> getCurrentPortifolio(@PathVariable String userId) throws IOException {
+		
+		return ResponseEntity.ok().body(service.getCurrentPortifolio(userId));
+	}
+	
+	@RequestMapping(value = "/getCurrentPortifolioHistorical/{userId}", method = RequestMethod.GET)
+	public ResponseEntity<List<HistoricalQuote>> getCurrentPortifolioHistorical(@PathVariable String userId) throws IOException {
+		
+		return ResponseEntity.ok().body(service.getCurrentPortifolioHistorical(userId));
 	}
 
 	@RequestMapping(value = "/registerOperation", method = RequestMethod.POST)
