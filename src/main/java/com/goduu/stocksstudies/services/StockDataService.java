@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.goduu.stocksstudies.dto.ChartDataDTO;
+import com.goduu.stocksstudies.dto.EsgDTO;
 import com.goduu.stocksstudies.dto.PortifolioElement;
 import com.goduu.stocksstudies.dto.TimeseriesDTO;
 import com.goduu.stocksstudies.models.Operation;
@@ -69,6 +70,26 @@ public class StockDataService {
                 item.put("earningsAnnouncement", stock.getStats().getEarningsAnnouncement());
                 res.put("market", item);
 
+                return res;
+
+        }
+
+        public JsonObject querySummary(String module, String ticker) throws JsonIOException, JsonSyntaxException, IOException{
+                JsonObject summary = getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
+                                + ticker + "?modules=" + module);
+                JsonObject qs = summary.getAsJsonObject("quoteSummary");
+                return qs.get("result").getAsJsonArray().get(0).getAsJsonObject().get(module)
+                                .getAsJsonObject();      
+
+        }
+
+        public EsgDTO getEsg(String ticker) throws IOException {
+
+                EsgDTO res = new EsgDTO();                
+                JsonObject results = querySummary("esgScores", ticker);
+                res.setPerformance(results.get("esgPerformance") != null ? results.get("esgPerformance").getAsString() : "");
+                res.setValue(results.get("totalEsg").getAsJsonObject().get("raw").getAsDouble());
+                res.addScores(results);
                 return res;
 
         }
@@ -163,6 +184,7 @@ public class StockDataService {
                                 .getAsJsonObject();
                 el.setCurrentPrice(YahooFinance.get(ticker).getQuote().getPrice().doubleValue());
                 el.setSector(results.get("sector") != null ? results.get("sector").getAsString() : "");
+                el.setIndustry(results.get("industry") != null ? results.get("industry").getAsString() : "");
                 return el;
 
         }
@@ -182,12 +204,7 @@ public class StockDataService {
                 Calendar from = Calendar.getInstance();
                 from.add(calendarPeriod, -objDto.getAmount());
 
-                TimeseriesDTO ts = new TimeseriesDTO(stock.getHistory(from, to, calendarGranularity));
-                TimeseriesDTO ts2 = new TimeseriesDTO(stock2.getHistory(from, to, calendarGranularity));
-                List<HistoricalQuote> merged = ts.merge(ts2);
                 res.put("PriceHistory", stock.getHistory(from, to, calendarGranularity));
-                res.put("PriceHistory2", stock2.getHistory(from, to, calendarGranularity));
-                res.put("PriceHistoryMerged", merged);
 
                 return res;
 

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.goduu.stocksstudies.dto.ChartDataDTO;
+import com.goduu.stocksstudies.dto.EsgDTO;
 import com.goduu.stocksstudies.services.SparkService;
 import com.goduu.stocksstudies.services.StockDataService;
 
@@ -39,6 +40,14 @@ public class StocksDataController {
 			throws IOException, java.io.IOException {
 
 		return ResponseEntity.ok().body(service.getStats(ticker));
+
+	}
+	
+	@RequestMapping(value = "/esg/{ticker}", method = RequestMethod.GET)
+	public ResponseEntity<EsgDTO> getEsg(@PathVariable String ticker)
+			throws IOException, java.io.IOException {
+
+		return ResponseEntity.ok().body(service.getEsg(ticker));
 
 	}
 

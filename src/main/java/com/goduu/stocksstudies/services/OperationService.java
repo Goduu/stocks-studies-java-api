@@ -129,6 +129,7 @@ public class OperationService {
 			}
 		}
 		summerizedPortifolio.setSectors();
+		summerizedPortifolio.setIndustries();
 
 		return summerizedPortifolio;
 	}

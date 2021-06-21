@@ -19,6 +19,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import yahoofinance.histquotes.HistoricalQuote;
 
+/**
+ * Represents
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,10 +31,10 @@ public class TimeseriesDTO implements Serializable {
 
     private List<HistoricalQuote> eventList;
 
-    private String ticker; 
+    private String ticker;
 
     public TimeseriesDTO(List<HistoricalQuote> events) {
-        if(!events.isEmpty()){
+        if (!events.isEmpty()) {
             events.forEach(e -> eventValues.put(e.getDate(), e.getClose().doubleValue()));
             eventList = new ArrayList<>(events);
             ticker = events.get(0).getSymbol();
@@ -49,7 +52,7 @@ public class TimeseriesDTO implements Serializable {
             value = 0d;
             // get values before the requested date
             // SortedMap<Calendar, Double> head = eventValues.headMap(date);
-            // value = head.isEmpty() ? 0 // none before
+            // value = head.isEmpty() ? 0d // none before
             // : head.get(head.lastKey()); // first before
         }
         return value;
@@ -69,9 +72,9 @@ public class TimeseriesDTO implements Serializable {
             for (Calendar d = minDate; d.before(maxDate); d.add(Calendar.DATE, 1)) {
                 Map<String, Double> qntityList = getQuantityBeforeDate(ops, d.getTimeInMillis());
                 HistoricalQuote hc = new HistoricalQuote();
-                Double value = qntityList.get(t.getTicker())* t.getValueByDate(d) +
-                 (qntityList.get(getTicker()) == null ? 1 :  qntityList.get(getTicker())) *getValueByDate(d);
-                if(value != 0){
+                Double value = qntityList.get(t.getTicker()) * t.getValueByDate(d)
+                        + (qntityList.get(getTicker()) == null ? 1 : qntityList.get(getTicker())) * getValueByDate(d);
+                if (value != 0) {
                     hc.setClose(new BigDecimal(value, MathContext.DECIMAL64));
                     hc.setSymbol("Merged");
                     hc.setDate((Calendar) d.clone());
@@ -87,16 +90,15 @@ public class TimeseriesDTO implements Serializable {
 
     private Map<String, Double> getQuantityBeforeDate(Map<String, List<Operation>> list, long date) {
 
-		Map<String, Double> res = new HashMap<>();
+        Map<String, Double> res = new HashMap<>();
 
-		for (Map.Entry<String, List<Operation>> entry : list.entrySet()) {
+        for (Map.Entry<String, List<Operation>> entry : list.entrySet()) {
 
-			Double sum = entry.getValue().stream().filter(v -> v.getDate() < date).mapToDouble(Operation::getShares).sum();
-			res.put(entry.getKey(), sum);
-
-		}
-
-		return res;
-	}
+            Double sum = entry.getValue().stream().filter(v -> v.getDate() < date).mapToDouble(Operation::getShares)
+                    .sum();
+            res.put(entry.getKey(), sum);
+        }
+        return res;
+    }
 
 }

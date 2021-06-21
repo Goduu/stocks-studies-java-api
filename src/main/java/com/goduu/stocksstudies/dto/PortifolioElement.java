@@ -14,6 +14,8 @@ public class PortifolioElement implements Serializable {
     String asset;
 
     String sector;
+    
+    String industry;
 
     Double quantity;
 

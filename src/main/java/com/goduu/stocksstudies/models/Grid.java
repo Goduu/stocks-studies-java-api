@@ -15,6 +15,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+* Grid is the main entity we'll be using to save the grid elements
+* 
+* @author Goduu
+* 
+*/
+
 @Getter
 @Setter
 @AllArgsConstructor
