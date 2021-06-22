@@ -192,7 +192,6 @@ public class StockDataService {
         public Map<String, Object> getPriceHistory(ChartDataDTO objDto) throws IOException {
 
                 Stock stock = YahooFinance.get(objDto.getTicker());
-                Stock stock2 = YahooFinance.get("FRT");
 
                 Map<String, Object> res = new HashMap<>();
 
@@ -205,10 +204,26 @@ public class StockDataService {
                 from.add(calendarPeriod, -objDto.getAmount());
 
                 res.put("PriceHistory", stock.getHistory(from, to, calendarGranularity));
+                res.put("type", "price");
 
                 return res;
 
         }
+        
+        // public Map<String, Object> getEarningHistory(String ticker) throws IOException {
+
+        //         Map<String, Object> res = new HashMap<>();
+
+        //         JsonObject summary = getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
+        //                         + ticker + "?modules=summaryProfile");
+        //         JsonObject qs = summary.getAsJsonObject("quoteSummary");
+
+        //         res.put("EarningHistory", stock.get(from, to, calendarGranularity));
+        //         res.put("type", "price");
+
+        //         return res;
+
+        // }
 
         public Map<String, List<HistoricalQuote>> getPriceHistoryByOperations(List<Operation> op) throws IOException {
 
@@ -258,6 +273,7 @@ public class StockDataService {
                 from.add(calendarPeriod, -objDto.getAmount());
 
                 res.put("PriceHistory", stock.getDividendHistory(from, to));
+                res.put("type", "dividend");
 
                 return res;
 
