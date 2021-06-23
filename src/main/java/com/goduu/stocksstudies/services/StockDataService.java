@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import com.goduu.stocksstudies.dto.ChartDataDTO;
 import com.goduu.stocksstudies.dto.EsgDTO;
 import com.goduu.stocksstudies.dto.PortifolioElement;
-import com.goduu.stocksstudies.dto.TimeseriesDTO;
+import com.goduu.stocksstudies.dto.StatsDTO;
 import com.goduu.stocksstudies.models.Operation;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
@@ -44,7 +44,7 @@ public class StockDataService {
         Interval DAILY = Interval.DAILY;
         Interval WEEKLY = Interval.WEEKLY;
 
-        public Map<String, Object> getStats(String ticker) throws IOException {
+        public Map<String, Object> getIndic(String ticker) throws IOException {
 
                 Stock stock = YahooFinance.get(ticker);
 
@@ -74,20 +74,111 @@ public class StockDataService {
 
         }
 
-        public JsonObject querySummary(String module, String ticker) throws JsonIOException, JsonSyntaxException, IOException{
+        public List<StatsDTO> getStats(String ticker) throws IOException {
+
+                Stock stock = YahooFinance.get(ticker);
+
+                List<StatsDTO> res = new ArrayList<>();
+                StatsDTO item = new StatsDTO();
+                item.setLabel("eps");
+                item.setValue(stock.getStats().getEps());
+                item.setDataType("number");
+                res.add(item);
+                item = new StatsDTO();
+                item.setLabel("pe");
+                item.setValue(stock.getStats().getPe());
+                item.setDataType("number");
+                res.add(item);
+                item = new StatsDTO();
+                item.setLabel("peg");
+                item.setValue(stock.getStats().getPeg());
+                item.setDataType("number");
+                res.add(item);
+                item = new StatsDTO();
+                item.setLabel("roe");
+                item.setValue(stock.getStats().getROE());
+                item.setDataType("number");
+                res.add(item);
+                item = new StatsDTO();
+                item.setLabel("ebitda");
+                item.setValue(stock.getStats().getEBITDA());
+                item.setDataType("number");
+                res.add(item);
+                item = new StatsDTO();
+                item.setLabel("epsEstimateCurrentYear");
+                item.setValue(stock.getStats().getEpsEstimateCurrentYear());
+                item.setDataType("number");
+                res.add(item);
+                item = new StatsDTO();
+                item.setLabel("epsEstimateNextQuarter");
+                item.setValue(stock.getStats().getEpsEstimateNextQuarter());
+                item.setDataType("number");
+                res.add(item);
+                item = new StatsDTO();
+                item.setLabel("epsEstimateNextYear");
+                item.setValue(stock.getStats().getEpsEstimateCurrentYear());
+                item.setDataType("number");
+                res.add(item);
+                item = new StatsDTO();
+                item.setLabel("marketCap");
+                item.setValue(stock.getStats().getMarketCap());
+                item.setDataType("number");
+                res.add(item);
+                item = new StatsDTO();
+                item.setLabel("sharesOutstanding");
+                item.setValue(stock.getStats().getSharesOutstanding());
+                item.setDataType("number");
+                res.add(item);
+                item = new StatsDTO();
+                item.setLabel("priceBook");
+                item.setValue(stock.getStats().getPriceBook());
+                item.setDataType("number");
+                res.add(item);
+                item = new StatsDTO();
+                item.setLabel("bookValuePerShare");
+                item.setValue(stock.getStats().getBookValuePerShare());
+                item.setDataType("number");
+                res.add(item);
+                item = new StatsDTO();
+                item.setLabel("priceSales");
+                item.setValue(stock.getStats().getPriceSales());
+                item.setDataType("number");
+                res.add(item);
+                item = new StatsDTO();
+                item.setLabel("revenue");
+                item.setValue(stock.getStats().getRevenue());
+                item.setDataType("number");
+                res.add(item);
+                item = new StatsDTO();
+                item.setLabel("oneYearTargetPrice");
+                item.setValue(stock.getStats().getOneYearTargetPrice());
+                item.setDataType("number");
+                res.add(item);
+                item = new StatsDTO();
+                // item.setLabel("earningsAnnouncement");
+                // item.setValue(stock.getStats().getEarningsAnnouncement());
+                // item.setDataType("date");
+                // res.add(item);
+                res = res.stream().filter(r -> r.getValue() != null).collect(Collectors.toList());
+                return res;
+
+        }
+
+        public JsonObject querySummary(String module, String ticker)
+                        throws JsonIOException, JsonSyntaxException, IOException {
                 JsonObject summary = getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
                                 + ticker + "?modules=" + module);
                 JsonObject qs = summary.getAsJsonObject("quoteSummary");
-                return qs.get("result").getAsJsonArray().get(0).getAsJsonObject().get(module)
-                                .getAsJsonObject();      
+                return qs.get("result").getAsJsonArray().get(0).getAsJsonObject().get(module).getAsJsonObject();
 
         }
 
         public EsgDTO getEsg(String ticker) throws IOException {
 
-                EsgDTO res = new EsgDTO();                
+                EsgDTO res = new EsgDTO();
                 JsonObject results = querySummary("esgScores", ticker);
-                res.setPerformance(results.get("esgPerformance") != null ? results.get("esgPerformance").getAsString() : "");
+                res.setPerformance(results.get("esgPerformance") != null ? results.get("esgPerformance").getAsString()
+                                : "");
                 res.setValue(results.get("totalEsg").getAsJsonObject().get("raw").getAsDouble());
                 res.addScores(results);
                 return res;
@@ -209,19 +300,21 @@ public class StockDataService {
                 return res;
 
         }
-        
-        // public Map<String, Object> getEarningHistory(String ticker) throws IOException {
 
-        //         Map<String, Object> res = new HashMap<>();
+        // public Map<String, Object> getEarningHistory(String ticker) throws
+        // IOException {
 
-        //         JsonObject summary = getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
-        //                         + ticker + "?modules=summaryProfile");
-        //         JsonObject qs = summary.getAsJsonObject("quoteSummary");
+        // Map<String, Object> res = new HashMap<>();
 
-        //         res.put("EarningHistory", stock.get(from, to, calendarGranularity));
-        //         res.put("type", "price");
+        // JsonObject summary =
+        // getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
+        // + ticker + "?modules=summaryProfile");
+        // JsonObject qs = summary.getAsJsonObject("quoteSummary");
 
-        //         return res;
+        // res.put("EarningHistory", stock.get(from, to, calendarGranularity));
+        // res.put("type", "price");
+
+        // return res;
 
         // }
 
