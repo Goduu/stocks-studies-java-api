@@ -178,6 +178,9 @@
 				<artifactId>heroku-maven-plugin</artifactId>
 				<version>3.0.3</version>
 			</plugin>
+			<processTypes>
+				<web>java $JAVA_OPTS -cp target/classes:target/dependency/* com.goduu.stocksstudies.WorkshopmongoApplication</web>
+			</processTypes>
 			
 		</plugins>
 	</build>
