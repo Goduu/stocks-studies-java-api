@@ -6,18 +6,24 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.goduu.stocksstudies.dto.ChartDTO;
 import com.goduu.stocksstudies.dto.ChartDataDTO;
 import com.goduu.stocksstudies.dto.EsgDTO;
+import com.goduu.stocksstudies.dto.FinancialDTO;
 import com.goduu.stocksstudies.dto.PortifolioElement;
 import com.goduu.stocksstudies.dto.StatsDTO;
 import com.goduu.stocksstudies.models.Operation;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
@@ -170,6 +176,72 @@ public class StockDataService {
                                 + ticker + "?modules=" + module);
                 JsonObject qs = summary.getAsJsonObject("quoteSummary");
                 return qs.get("result").getAsJsonArray().get(0).getAsJsonObject().get(module).getAsJsonObject();
+
+        }
+
+        public long getDateFromQuarter(String quarter) throws ParseException {
+
+                String q = quarter.split("Q")[0];
+                String year = quarter.split("Q")[1];
+                String day = "25";
+                String month = q.equals("1") ? "3" : q.equals("1") ? "6" : q.equals("3") ? "9" : "11";
+                String pattern = "dd-MM-yyyy";
+                SimpleDateFormat df = new SimpleDateFormat(pattern);
+                Date date = df.parse(day + "-" + month + "-" + year);
+                return date.getTime();
+
+        }
+
+        public ChartDTO getFinancialHistory(String ticker) throws IOException, ParseException {
+
+                List<Object> res = new ArrayList<>();
+                JsonObject results = querySummary("earnings", ticker);
+                JsonObject financials = results.get("financialsChart").getAsJsonObject();
+                JsonArray yearly = financials.get("yearly").getAsJsonArray();
+                JsonArray quarterly = financials.get("quarterly").getAsJsonArray();
+                // "3Q2020"
+                // "2017"
+                String patternYearly = "MM-yyyy";
+                SimpleDateFormat df = new SimpleDateFormat(patternYearly);
+
+                quarterly.forEach(q -> {
+                        FinancialDTO fin = new FinancialDTO();
+                        fin.setPeriod("quarterly");
+                        fin.setType("revenue");
+                        fin.setFormatedValue(
+                                        q.getAsJsonObject().get("revenue").getAsJsonObject().get("fmt").getAsString());
+                        fin.setValue(q.getAsJsonObject().get("revenue").getAsJsonObject().get("raw").getAsBigInteger());
+                        try {
+                                fin.setDateEpoch(getDateFromQuarter(q.getAsJsonObject().get("date").getAsString()));
+                        } catch (ParseException e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                        }
+                        fin.setDate(q.getAsJsonObject().get("date").getAsString());
+                        res.add(fin);
+                });
+                yearly.forEach(q -> {
+                        FinancialDTO fin = new FinancialDTO();
+                        fin.setPeriod("yearly");
+                        fin.setType("revenue");
+                        fin.setFormatedValue(
+                                        q.getAsJsonObject().get("revenue").getAsJsonObject().get("fmt").getAsString());
+                        fin.setValue(q.getAsJsonObject().get("revenue").getAsJsonObject().get("raw").getAsBigInteger());
+                        try {
+                                fin.setDateEpoch(df.parse("12-" + q.getAsJsonObject().get("date").getAsString())
+                                                .getTime());
+                        } catch (ParseException e) {
+                                // TODO Auto-generated catch block
+                                e.printStackTrace();
+                        }
+                        fin.setDate(q.getAsJsonObject().get("date").getAsString());
+                        res.add(fin);
+                });
+
+                ChartDTO chart = new ChartDTO();
+                chart.setType("financial");
+                chart.setValues(res);
+                return chart;
 
         }
 

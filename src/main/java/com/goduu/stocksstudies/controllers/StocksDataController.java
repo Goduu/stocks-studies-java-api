@@ -1,10 +1,12 @@
 package com.goduu.stocksstudies.controllers;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.goduu.stocksstudies.dto.ChartDTO;
 import com.goduu.stocksstudies.dto.ChartDataDTO;
 import com.goduu.stocksstudies.dto.EsgDTO;
 import com.goduu.stocksstudies.dto.StatsDTO;
@@ -81,6 +83,12 @@ public class StocksDataController {
 			throws IOException, java.io.IOException {
 
 		return ResponseEntity.ok().body(service.getStocksPrices(tickers));
+	}
+	@RequestMapping(value = "/getFinancialHistory/{ticker}", method = RequestMethod.GET)
+	public ResponseEntity<ChartDTO> getFinancialHistory(@PathVariable String ticker)
+			throws IOException, java.io.IOException, ParseException {
+
+		return ResponseEntity.ok().body(service.getFinancialHistory(ticker));
 	}
 
 	@Autowired
