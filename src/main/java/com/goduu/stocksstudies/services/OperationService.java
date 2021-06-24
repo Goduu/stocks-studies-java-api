@@ -16,11 +16,6 @@ import com.goduu.stocksstudies.models.Operation;
 import com.goduu.stocksstudies.repository.OperationRepository;
 import com.goduu.stocksstudies.services.exception.ObjectNotFoundException;
 
-import org.apache.arrow.flatbuf.Bool;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Encoder;
-import org.apache.spark.sql.Encoders;
-import org.apache.spark.sql.SparkSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
@@ -44,8 +39,6 @@ public class OperationService {
 	@Autowired
 	private OperationRepository repo;
 
-	@Autowired
-	private SparkService sparkService;
 
 	@Autowired
 	private StockDataService stockDataService;
@@ -166,14 +159,6 @@ public class OperationService {
 		return merged;
 	}
 
-	// private Dataset<Operation> encodeOperation(Operation op) {
 
-	// 	SparkSession spark = sparkService.getSpark();
-	// 	Encoder<Operation> encoder = Encoders.bean(Operation.class);
-	// 	Dataset<Operation> javaBeanDS = spark.createDataset(Collections.singletonList(op), encoder);
-
-	// 	return javaBeanDS;
-
-	// }
 
 }

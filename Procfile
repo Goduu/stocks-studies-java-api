@@ -1,1 +1,1 @@
-web: java -cp target/classes;target/dependency/* com.goduu.stocksstudies.WorkshopmongoApplication
+web: java $JAVA_OPTS -cp target/classes:target/dependency/* com.goduu.stocksstudies.WorkshopmongoApplication

@@ -10,7 +10,6 @@ import com.goduu.stocksstudies.dto.ChartDTO;
 import com.goduu.stocksstudies.dto.ChartDataDTO;
 import com.goduu.stocksstudies.dto.EsgDTO;
 import com.goduu.stocksstudies.dto.StatsDTO;
-import com.goduu.stocksstudies.services.SparkService;
 import com.goduu.stocksstudies.services.StockDataService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,8 +90,6 @@ public class StocksDataController {
 		return ResponseEntity.ok().body(service.getFinancialHistory(ticker));
 	}
 
-	@Autowired
-	private SparkService sparkService;
 
 	@RequestMapping(value = "/testagg", method = RequestMethod.POST)
 	public ResponseEntity<Map<String, Object>> testaggregationAPI(@RequestBody Map<String, Long> quantities) {
@@ -113,7 +110,6 @@ public class StocksDataController {
 	public ResponseEntity<Map<String, Long>> testAPI(@RequestBody List<String> wordList)
 			throws IOException, java.io.IOException {
 
-		Map<String, Long> res = sparkService.getCount(wordList);
 		// Stock stock = YahooFinance.get(ticker);
 
 		// Map<String,Object> res = new HashMap<>();
@@ -173,7 +169,8 @@ public class StocksDataController {
 		// res.put("getStockExchange", stock.getStockExchange());
 		// res.put("getStats", stock.getStats());
 		// res.put("getSplitHistory", stock.getSplitHistory());
-		return ResponseEntity.ok().body(res);
+		// return ResponseEntity.ok().body(res);
+		return null;
 	}
 
 }

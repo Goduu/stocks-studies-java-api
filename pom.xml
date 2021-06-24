@@ -95,18 +95,6 @@
 			<version>3.16.2</version>
 		</dependency>
 
-		<dependency>
-			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-core_2.12</artifactId>
-			<version>3.1.2</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.spark</groupId>
-			<artifactId>spark-sql_2.12</artifactId>
-			<version>3.1.2</version>
-			<scope>provided</scope>
-		</dependency>
-
 	</dependencies>
 	
 
@@ -184,6 +172,11 @@
 						<phase>generate-resources</phase>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.heroku.sdk</groupId>
+				<artifactId>heroku-maven-plugin</artifactId>
+				<version>3.0.3</version>
 			</plugin>
 			
 		</plugins>
