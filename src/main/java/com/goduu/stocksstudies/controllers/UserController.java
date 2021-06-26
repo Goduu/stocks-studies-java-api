@@ -47,14 +47,18 @@ public class UserController {
 	}
 
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
-	public ResponseEntity<Void> register(@RequestBody UserRegistryDTO objDto) {
+	public ResponseEntity register(@RequestBody UserRegistryDTO objDto) throws UnsupportedEncodingException {
 		User obj = service.fromRegistryDTO(objDto);
 		obj = service.register(obj);
 		if (obj == null || obj.isEmpty()) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 		}
-		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(obj.getId()).toUri();
-		return ResponseEntity.created(uri).build();
+		Map<String, String> results = new HashMap<>();
+		User user = service.authenticate(objDto.getEmail(), objDto.getPassword(), results);
+		if (user == null) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(results);
+		}
+		return buildSuccess(results.get("authToken"), user);
 	}
 
 	private ResponseEntity<Map<String,Object>> buildSuccess(String authToken, User user) {

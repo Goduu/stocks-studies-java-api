@@ -19,6 +19,10 @@ public class TickerDTO implements Serializable{
     
     private String description;
 
+    private Double price;
+
+    private ChartDTO priceChart = new ChartDTO("price");
+
     public TickerDTO(Ticker obj) {
       ticker = obj.getTicker();
 		  description = obj.getDescription();

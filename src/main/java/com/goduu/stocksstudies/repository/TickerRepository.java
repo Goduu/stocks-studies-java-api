@@ -19,11 +19,13 @@ public interface TickerRepository extends MongoRepository<Ticker, String> {
             "     '$or': [{'ticker':{'$regex': ?0, '$options' : 'i'}},          "+
             "         {'description':{'$regex': ?0, '$options' : 'i'}}]         "+
             "    },                                                             "+
-            "     {'exchange': { '$in': ?1}}                                              "+
+            "     {'exchange': { '$in': ?1}}                                    "+
             "     ]                                                             "+
             "},                                                                 "+ 
             "{'ticker': 1,'description':1, '_id': 0}")
     Page<Ticker> findAllByDescriptionAndTickerAndExchange(String search, List<String> exchange, Pageable pageable);
+
+    Ticker findByTicker(String ticker);
 
     
 		// return dumps(db.tickers

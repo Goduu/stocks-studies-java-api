@@ -1,11 +1,14 @@
 package com.goduu.stocksstudies.controllers;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.goduu.stocksstudies.dto.TickerDTO;
 import com.goduu.stocksstudies.models.Ticker;
 import com.goduu.stocksstudies.services.TickerService;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +32,13 @@ public class TickerController {
 		List<Ticker> list = service.findAllByDescriptionAndTickerAndExchange(search, exchange, 50);
 		List<TickerDTO> listDto = list.stream().map(x -> new TickerDTO(x)).collect(Collectors.toList());
 		return ResponseEntity.ok().body(listDto);
+	}
+	
+	@RequestMapping(value = "trending/{exchange}", method = RequestMethod.GET)
+	public ResponseEntity<List<TickerDTO>> findTreddingByExchange(@PathVariable String exchange) throws JsonIOException, JsonSyntaxException, IOException {
+
+		List<TickerDTO> list = service.findTreddingByCountry(exchange);
+		return ResponseEntity.ok().body(list);
 	}
 
 	
