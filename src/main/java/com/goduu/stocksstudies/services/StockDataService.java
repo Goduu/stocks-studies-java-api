@@ -1,11 +1,7 @@
 package com.goduu.stocksstudies.services;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import java.net.URL;
-import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,13 +19,13 @@ import com.goduu.stocksstudies.dto.FinancialDTO;
 import com.goduu.stocksstudies.dto.PortifolioElement;
 import com.goduu.stocksstudies.dto.StatsDTO;
 import com.goduu.stocksstudies.models.Operation;
+import com.goduu.stocksstudies.utils.Utils;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +45,9 @@ public class StockDataService {
         Interval MONTHLY = Interval.MONTHLY;
         Interval DAILY = Interval.DAILY;
         Interval WEEKLY = Interval.WEEKLY;
+
+        @Autowired
+        private Utils utils;
 
         public Map<String, Object> getIndic(String ticker) throws IOException {
 
@@ -80,6 +79,12 @@ public class StockDataService {
 
         }
 
+        /**
+         *  Get statistics from a ticker
+         * @param ticker string ("AMZN", "WEGE3.SA"...)
+         * @return A list with the statistics ({label, datatype("number", "date", "string"), value})
+         * @throws IOException
+         */
         public List<StatsDTO> getStats(String ticker) throws IOException {
 
                 Stock stock = YahooFinance.get(ticker);
@@ -170,27 +175,28 @@ public class StockDataService {
 
         }
 
+        /**
+         * Return the results from a ticker from a respective module
+         * @param module the type o information to be quered
+         * Examples of modules: 'assetProfile','summaryProfile','summaryDetail','esgScores','price','incomeStatementHistory','incomeStatementHistoryQuarterly',
+         * 'balanceSheetHistory','balanceSheetHistoryQuarterly','cashflowStatementHistory','cashflowStatementHistoryQuarterly','defaultKeyStatistics','financialData',
+         * 'calendarEvents','secFilings','recommendationTrend','upgradeDowngradeHistory','institutionOwnership','fundOwnership','majorDirectHolders','majorHoldersBreakdown',
+         * 'insiderTransactions','insiderHolders','netSharePurchaseActivity','earnings','earningsHistory','earningsTrend','industryTrend','indexTrend','sectorTrend'
+         * @param ticker
+         * @return The JsonObject of the respectiv module
+         * @throws JsonIOException
+         * @throws JsonSyntaxException
+         * @throws IOException
+         */
         public JsonObject querySummary(String module, String ticker)
                         throws JsonIOException, JsonSyntaxException, IOException {
-                JsonObject summary = getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
+                JsonObject summary = utils.getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
                                 + ticker + "?modules=" + module);
                 JsonObject qs = summary.getAsJsonObject("quoteSummary");
                 return qs.get("result").getAsJsonArray().get(0).getAsJsonObject().get(module).getAsJsonObject();
 
         }
 
-        public long getDateFromQuarter(String quarter) throws ParseException {
-
-                String q = quarter.split("Q")[0];
-                String year = quarter.split("Q")[1];
-                String day = "25";
-                String month = q.equals("1") ? "3" : q.equals("1") ? "6" : q.equals("3") ? "9" : "11";
-                String pattern = "dd-MM-yyyy";
-                SimpleDateFormat df = new SimpleDateFormat(pattern);
-                Date date = df.parse(day + "-" + month + "-" + year);
-                return date.getTime();
-
-        }
 
         public ChartDTO getFinancialHistory(String ticker) throws IOException, ParseException {
 
@@ -212,7 +218,7 @@ public class StockDataService {
                                         q.getAsJsonObject().get("revenue").getAsJsonObject().get("fmt").getAsString());
                         fin.setValue(q.getAsJsonObject().get("revenue").getAsJsonObject().get("raw").getAsBigInteger());
                         try {
-                                fin.setDateEpoch(getDateFromQuarter(q.getAsJsonObject().get("date").getAsString()));
+                                fin.setDateEpoch(utils.getDateFromQuarter(q.getAsJsonObject().get("date").getAsString()));
                         } catch (ParseException e) {
                                 // TODO Auto-generated catch block
                                 e.printStackTrace();
@@ -266,46 +272,12 @@ public class StockDataService {
                 return res;
         }
 
-        // public Map<String,Object> getStocksCurves(String[] tickers) throws
-        // IOException{
-        // Map<String,HistoricalQuote> res = new HashMap<>();
-        // Map<String, Stock> stocks = YahooFinance.get(tickers, true);
-
-        // Calendar from = Calendar.getInstance();
-        // Calendar to = Calendar.getInstance();
-        // from.add(Calendar.YEAR, -5);
-
-        // for (Map.Entry<String, Stock> entry : stocks.entrySet()) {
-        // res.put(entry.getKey(), entry.getValue().getHistory());
-        // }
-        // return res;
-        // }
-
-        public JsonObject getJsonFromURL(String sUrl) throws JsonIOException, JsonSyntaxException, IOException {
-                // Connect to the URL using java's native library
-                URL url = new URL(sUrl);
-                URLConnection request = url.openConnection();
-                request.connect();
-
-                // Convert to a JSON object to print data
-                JsonElement root = JsonParser.parseReader(new InputStreamReader((InputStream) request.getContent())); // Convert
-                                                                                                                      // the
-                                                                                                                      // input
-                                                                                                                      // stream
-                                                                                                                      // to
-                                                                                                                      // a
-                                                                                                                      // json
-                                                                                                                      // element
-                JsonObject rootobj = root.getAsJsonObject(); // May be an array, may be an object.
-                return rootobj;
-        }
-
         public Map<String, Object> getData(String ticker) throws IOException {
                 // public Map<String,Object> getData(String ticker) throws IOException{
 
                 Map<String, Object> res = new HashMap<>();
                 // Stock stock = YahooFinance.get(ticker);
-                JsonObject summary = getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
+                JsonObject summary = utils.getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
                                 + ticker + "?modules=summaryProfile");
                 JsonObject qs = summary.getAsJsonObject("quoteSummary");
                 JsonObject results = qs.get("result").getAsJsonArray().get(0).getAsJsonObject().get("summaryProfile")
@@ -317,7 +289,7 @@ public class StockDataService {
                                 results.get("longBusinessSummary") != null
                                                 ? results.get("longBusinessSummary").getAsString()
                                                 : "");
-                summary = getJsonFromURL("https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + ticker);
+                summary = utils.getJsonFromURL("https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + ticker);
                 results = summary.getAsJsonObject("quoteResponse").get("result").getAsJsonArray().get(0)
                                 .getAsJsonObject();
                 res.put("fullExchangeName",
@@ -333,14 +305,17 @@ public class StockDataService {
 
         }
 
-        /*
-         * Given a ticker Return its current Price and Sector
+        /**
+         *  Given a ticker Return its current Price and Sector
+         * @param ticker ticker string ("AMZN", "WEGE3.SA"...)
+         * @return Price and sector of the tick
+         * @throws IOException
          */
         public PortifolioElement getPortifolioInfo(String ticker) throws IOException {
                 // public Map<String,Object> getData(String ticker) throws IOException{
 
                 PortifolioElement el = new PortifolioElement();
-                JsonObject summary = getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
+                JsonObject summary = utils.getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
                                 + ticker + "?modules=summaryProfile");
                 JsonObject qs = summary.getAsJsonObject("quoteSummary");
                 JsonObject results = qs.get("result").getAsJsonArray().get(0).getAsJsonObject().get("summaryProfile")
@@ -372,23 +347,6 @@ public class StockDataService {
                 return res;
 
         }
-
-        // public Map<String, Object> getEarningHistory(String ticker) throws
-        // IOException {
-
-        // Map<String, Object> res = new HashMap<>();
-
-        // JsonObject summary =
-        // getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
-        // + ticker + "?modules=summaryProfile");
-        // JsonObject qs = summary.getAsJsonObject("quoteSummary");
-
-        // res.put("EarningHistory", stock.get(from, to, calendarGranularity));
-        // res.put("type", "price");
-
-        // return res;
-
-        // }
 
         public Map<String, List<HistoricalQuote>> getPriceHistoryByOperations(List<Operation> op) throws IOException {
 

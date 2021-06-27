@@ -14,6 +14,7 @@ import java.util.stream.IntStream;
 import com.goduu.stocksstudies.dto.TickerDTO;
 import com.goduu.stocksstudies.models.Ticker;
 import com.goduu.stocksstudies.repository.TickerRepository;
+import com.goduu.stocksstudies.utils.Utils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
@@ -33,6 +34,9 @@ public class TickerService {
 
 	@Autowired
 	private TickerRepository repo;
+
+	@Autowired
+	private Utils utils;
 
 	public List<Ticker> findAllByDescriptionAndTickerAndExchange(String search, List<String> exchange, int pageSize) {
 
@@ -106,7 +110,7 @@ public class TickerService {
 	 * @throws IOException
 	 */
 	public JsonArray queryTrending(String exchange) throws JsonIOException, JsonSyntaxException, IOException {
-		JsonObject summary = getJsonFromURL(
+		JsonObject summary = utils.getJsonFromURL(
 				"https://query1.finance.yahoo.com/v1/finance/trending/" + exchange + "?count=10");
 		JsonObject qs = summary.getAsJsonObject("finance");
 		return qs.get("result").getAsJsonArray().get(0).getAsJsonObject().get("quotes").getAsJsonArray();
@@ -123,7 +127,7 @@ public class TickerService {
 	 * @throws IOException
 	 */
 	public JsonObject queryFinancial(String ticker) throws JsonIOException, JsonSyntaxException, IOException {
-		JsonObject summary = getJsonFromURL("https://query1.finance.yahoo.com/v7/finance/spark?symbols=" + ticker
+		JsonObject summary = utils.getJsonFromURL("https://query1.finance.yahoo.com/v7/finance/spark?symbols=" + ticker
 				+ "&range=1d&interval=5m&indicators=close&includeTimestamps=false&includePrePost=false&corsDomain=finance.yahoo.com&.tsrc=finance");
 		JsonObject qs = summary.getAsJsonObject("spark");
 		return qs.get("result").getAsJsonArray().get(0).getAsJsonObject().get("response").getAsJsonArray().get(0)
@@ -131,13 +135,5 @@ public class TickerService {
 
 	}
 
-	public JsonObject getJsonFromURL(String sUrl) throws JsonIOException, JsonSyntaxException, IOException {
-		URL url = new URL(sUrl);
-		URLConnection request = url.openConnection();
-		request.connect();
-		JsonElement root = JsonParser.parseReader(new InputStreamReader((InputStream) request.getContent()));
-		JsonObject rootobj = root.getAsJsonObject(); // May be an array, may be an object.
-		return rootobj;
-	}
 
 }

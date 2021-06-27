@@ -22,7 +22,5 @@ public class ChartDTO implements Serializable{
         this.type = type;
     }
 
-    public void setValues(List<Map<String, Object>> priceChart) {
-    }
     
 }

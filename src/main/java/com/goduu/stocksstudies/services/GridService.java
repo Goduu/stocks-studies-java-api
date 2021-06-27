@@ -35,11 +35,20 @@ public class GridService {
 		return obj.orElseThrow(() -> new ObjectNotFoundException("ObjectNotFound"));
 	}
 
+	/**
+	 * Delete a grid by id
+	 * @param id
+	 */
 	public void delete(String id) {
 		findById(id);
 		repo.deleteById(id);
 	}
 
+	/**
+	 * Update a grid data atributes before saving it
+	 * @param newObj Grid to be updated to
+	 * @param obj Grid to be updated from
+	 */
 	private void updateData(Grid newObj, Grid obj) {
 		newObj.setIdentifier(obj.getIdentifier());
 		newObj.setUserId(obj.getUserId());
@@ -51,6 +60,11 @@ public class GridService {
 		return repo.insert(obj);
 	}
 
+	/**
+	 * Update or insert a new grid
+	 * @param grid
+	 * @return saved grid
+	 */
 	public Grid update(Grid grid) {
 		if (grid.getId() != null) {
 			Optional<Grid> obj = repo.findById(grid.getId());
@@ -69,6 +83,11 @@ public class GridService {
 
 	}
 
+	/**
+	 * Set a new Grid from a DTO
+	 * @param objDto
+	 * @return
+	 */
 	public Grid fromRegistryDTO(GridDTO objDto) {
 		Grid grid = new Grid();
 		grid.setId(objDto.getId());

@@ -39,7 +39,6 @@ public class OperationService {
 	@Autowired
 	private OperationRepository repo;
 
-
 	@Autowired
 	private StockDataService stockDataService;
 
@@ -48,6 +47,12 @@ public class OperationService {
 		return obj.orElseThrow(() -> new ObjectNotFoundException("Objeto não encontrado"));
 	}
 
+	/**
+	 * Fin all operations for an specific asset
+	 * @param userId
+	 * @param asset
+	 * @return
+	 */
 	public List<Operation> findAllByUserIdAndAsset(String userId, String asset) {
 		Optional<List<Operation>> obj = repo.findAllByUserIdAndAsset(userId, asset);
 		return obj.orElseThrow(() -> new ObjectNotFoundException("Objeto não encontrado"));
@@ -86,10 +91,14 @@ public class OperationService {
 		dbObjt.setUserId(obj.getUserId());
 	}
 
-	// private Double summingShares(List<Double> shares) {
-	// return shares.stream().reduce(0d, Double::sum);
-	// }
 
+	/**
+	 * Validade if an operation can be donne
+	 * If its a SELL, checks if there is enought amout to be sold
+	 * otherwise return true
+	 * @param op
+	 * @return
+	 */
 	private Boolean validateOperation(Operation op) {
 		if (op.getOperation() == SELL) {
 
@@ -100,6 +109,13 @@ public class OperationService {
 		return true;
 	}
 
+	/**
+	 * Get an Object with the sector and industries in 
+	 * ones portifolio with the respective value of each
+	 * @param userId
+	 * @return
+	 * @throws IOException
+	 */
 	public PortifolioDTO getCurrentPortifolio(String userId) throws IOException {
 
 		List<Operation> operations = findAllByUserId(userId);
@@ -127,6 +143,13 @@ public class OperationService {
 		return summerizedPortifolio;
 	}
 
+	/**
+	 * Return the merged Timeserie of a users portifolio
+	 * 
+	 * @param userId
+	 * @return
+	 * @throws IOException
+	 */
 	public List<HistoricalQuote> getCurrentPortifolioHistorical(String userId) throws IOException {
 
 		List<Operation> operations = findAllByUserId(userId);
@@ -153,12 +176,7 @@ public class OperationService {
 			}
 		}
 
-		// getQuantityBeforeDate(operations);
-		// summerizedPortifolio.setSectors();
-
 		return merged;
 	}
-
-
 
 }
