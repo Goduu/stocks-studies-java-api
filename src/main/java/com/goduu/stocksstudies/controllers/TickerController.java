@@ -29,7 +29,7 @@ public class TickerController {
 		if(search.equals("-all-")){
 			search = ".";
 		}
-		List<Ticker> list = service.findAllByDescriptionAndTickerAndExchange(search, exchange, 50);
+		List<Ticker> list = service.findAllByDescriptionAndTickerAndExchange(search, exchange, 20);
 		List<TickerDTO> listDto = list.stream().map(x -> new TickerDTO(x)).collect(Collectors.toList());
 		return ResponseEntity.ok().body(listDto);
 	}
