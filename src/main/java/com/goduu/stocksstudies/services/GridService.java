@@ -23,10 +23,10 @@ public class GridService {
 	public List<Grid> findAllByUserId(String userId) {
 		return repo.findAllByUserId(userId);
 	}
-	
+
 	public List<String> findAllIdentifiersByUser(String userId) {
 		List<Grid> gridList = repo.findAllIdentifiersByUser(userId);
-		return gridList.stream().map(g ->  g.getIdentifier()).collect(Collectors.toList());
+		return gridList.stream().map(g -> g.getIdentifier()).collect(Collectors.toList());
 
 	}
 
@@ -37,6 +37,7 @@ public class GridService {
 
 	/**
 	 * Delete a grid by id
+	 * 
 	 * @param id
 	 */
 	public void delete(String id) {
@@ -46,8 +47,9 @@ public class GridService {
 
 	/**
 	 * Update a grid data atributes before saving it
+	 * 
 	 * @param newObj Grid to be updated to
-	 * @param obj Grid to be updated from
+	 * @param obj    Grid to be updated from
 	 */
 	private void updateData(Grid newObj, Grid obj) {
 		newObj.setIdentifier(obj.getIdentifier());
@@ -62,6 +64,7 @@ public class GridService {
 
 	/**
 	 * Update or insert a new grid
+	 * 
 	 * @param grid
 	 * @return saved grid
 	 */
@@ -84,7 +87,24 @@ public class GridService {
 	}
 
 	/**
+	 * Set a grid as active
+	 * 
+	 * @param grid
+	 * @return saved grid
+	 */
+	public Grid deactivateGrid(String userId, String identifier) {
+		Optional<Grid> obj = repo.findAllByUserIdAndIdentifier(userId, identifier);
+		if (obj.isPresent()) {
+			obj.get().setActive(false);
+			return repo.save(obj.get());
+		}
+		return null;
+
+	}
+
+	/**
 	 * Set a new Grid from a DTO
+	 * 
 	 * @param objDto
 	 * @return
 	 */

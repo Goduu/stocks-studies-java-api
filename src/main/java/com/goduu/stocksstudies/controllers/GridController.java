@@ -48,5 +48,14 @@ public class GridController {
 		return ResponseEntity.ok().body(res.getId());
 	}
 	
+	@RequestMapping(value = "/deactivateGrid", method = RequestMethod.PUT)
+	public ResponseEntity<String> deactivateGrid(@RequestBody GridDTO objDto) {
+		
+		service.deactivateGrid(objDto.getUserId(), objDto.getIdentifier());
+
+		return ResponseEntity.noContent().build();
+
+	}
+	
 
 }
