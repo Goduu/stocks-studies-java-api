@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.goduu.stocksstudies.dto.ChartDTO;
 import com.goduu.stocksstudies.dto.ChartDataDTO;
@@ -18,7 +19,9 @@ import com.goduu.stocksstudies.dto.EsgDTO;
 import com.goduu.stocksstudies.dto.FinancialDTO;
 import com.goduu.stocksstudies.dto.PortifolioElement;
 import com.goduu.stocksstudies.dto.StatsDTO;
+import com.goduu.stocksstudies.dto.WatchlistElementDTO;
 import com.goduu.stocksstudies.models.Operation;
+import com.goduu.stocksstudies.models.StockDataDTO;
 import com.goduu.stocksstudies.utils.Utils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonIOException;
@@ -79,10 +82,62 @@ public class StockDataService {
 
         }
 
+        public List<WatchlistElementDTO> getWatchlistData(List<String> tickers) {
+                List<WatchlistElementDTO> response = new ArrayList<>();
+                tickers.forEach(t -> {
+                        try {
+                                WatchlistElementDTO el = new WatchlistElementDTO();
+                                el.setData(getData(t));
+                                el.setStatistics(getStats(t));
+                                JsonObject financial = queryFinancial(t, "7d", "1h");
+                                JsonArray prices = financial.get("indicators").getAsJsonObject().get("quote")
+                                                .getAsJsonArray().get(0).getAsJsonObject().get("close")
+                                                .getAsJsonArray();
+                                List<Object> valueList = new ArrayList<>();
+                                IntStream.range(0, prices.size()).forEach(idx -> {
+                                        valueList.add(prices.get(idx));
+                                });
+                                ChartDTO chart = new ChartDTO();
+                                chart.setType("priceChart");
+                                chart.setValues(valueList);
+                                el.setPriceChart(chart);
+                                response.add(el);
+                        } catch (Exception e) {
+                                // TODO: handle exception
+                                System.out.println("ERROR : " + e);
+                        }
+                });
+
+                return response;
+        }
+
         /**
-         *  Get statistics from a ticker
+         * Query the price data for 1 day with the granularity of 30min
+         * 
+         * @param ticker Ticker to be searched
+         * @return an object with the response
+         * @throws JsonIOException
+         * @throws JsonSyntaxException
+         * @throws IOException
+         */
+        public JsonObject queryFinancial(String ticker, String range, String interval)
+                        throws JsonIOException, JsonSyntaxException, IOException {
+                JsonObject summary = utils.getJsonFromURL("https://query1.finance.yahoo.com/v7/finance/spark?symbols="
+                                + ticker + "&range=" + range + "&interval=" + interval
+                                + "&indicators=close&includeTimestamps=false&includePrePost=false&corsDomain=finance.yahoo.com&.tsrc=finance");
+                JsonObject qs = summary.getAsJsonObject("spark");
+
+                return qs.get("result").getAsJsonArray().get(0).getAsJsonObject().get("response").getAsJsonArray()
+                                .get(0).getAsJsonObject();
+
+        }
+
+        /**
+         * Get statistics from a ticker
+         * 
          * @param ticker string ("AMZN", "WEGE3.SA"...)
-         * @return A list with the statistics ({label, datatype("number", "date", "string"), value})
+         * @return A list with the statistics ({label, datatype("number", "date",
+         *         "string"), value})
          * @throws IOException
          */
         public List<StatsDTO> getStats(String ticker) throws IOException {
@@ -91,81 +146,121 @@ public class StockDataService {
 
                 List<StatsDTO> res = new ArrayList<>();
                 StatsDTO item = new StatsDTO();
-                item.setLabel("eps");
-                item.setValue(stock.getStats().getEps());
-                item.setDataType("number");
+                item = new StatsDTO("eps", "number", stock.getStats().getEps());
                 res.add(item);
-                item = new StatsDTO();
-                item.setLabel("pe");
-                item.setValue(stock.getStats().getPe());
-                item.setDataType("number");
+                item = new StatsDTO("pe", "number", stock.getStats().getPe());
                 res.add(item);
-                item = new StatsDTO();
-                item.setLabel("peg");
-                item.setValue(stock.getStats().getPeg());
-                item.setDataType("number");
+                item = new StatsDTO("peg", "number", stock.getStats().getPeg());
                 res.add(item);
-                item = new StatsDTO();
-                item.setLabel("roe");
-                item.setValue(stock.getStats().getROE());
-                item.setDataType("number");
+                item = new StatsDTO("ebitda", "number", stock.getStats().getEBITDA());
                 res.add(item);
-                item = new StatsDTO();
-                item.setLabel("ebitda");
-                item.setValue(stock.getStats().getEBITDA());
-                item.setDataType("number");
+                item = new StatsDTO("epsEstimateCurrentYear", "number", stock.getStats().getEpsEstimateCurrentYear());
                 res.add(item);
-                item = new StatsDTO();
-                item.setLabel("epsEstimateCurrentYear");
-                item.setValue(stock.getStats().getEpsEstimateCurrentYear());
-                item.setDataType("number");
+                item = new StatsDTO("epsEstimateNextQuarter", "number", stock.getStats().getEpsEstimateNextQuarter());
                 res.add(item);
-                item = new StatsDTO();
-                item.setLabel("epsEstimateNextQuarter");
-                item.setValue(stock.getStats().getEpsEstimateNextQuarter());
-                item.setDataType("number");
+                item = new StatsDTO("epsEstimateNextYear", "number", stock.getStats().getEpsEstimateCurrentYear());
                 res.add(item);
-                item = new StatsDTO();
-                item.setLabel("epsEstimateNextYear");
-                item.setValue(stock.getStats().getEpsEstimateCurrentYear());
-                item.setDataType("number");
+                item = new StatsDTO("marketCap", "number", stock.getStats().getMarketCap());
                 res.add(item);
-                item = new StatsDTO();
-                item.setLabel("marketCap");
-                item.setValue(stock.getStats().getMarketCap());
-                item.setDataType("number");
+                item = new StatsDTO("sharesOutstanding", "number", stock.getStats().getSharesOutstanding());
                 res.add(item);
-                item = new StatsDTO();
-                item.setLabel("sharesOutstanding");
-                item.setValue(stock.getStats().getSharesOutstanding());
-                item.setDataType("number");
+                item = new StatsDTO("priceBook", "number", stock.getStats().getPriceBook());
                 res.add(item);
-                item = new StatsDTO();
-                item.setLabel("priceBook");
-                item.setValue(stock.getStats().getPriceBook());
-                item.setDataType("number");
+                item = new StatsDTO("bookValuePerShare", "number", stock.getStats().getBookValuePerShare());
                 res.add(item);
-                item = new StatsDTO();
-                item.setLabel("bookValuePerShare");
-                item.setValue(stock.getStats().getBookValuePerShare());
-                item.setDataType("number");
+                item = new StatsDTO("priceSales", "number", stock.getStats().getPriceSales());
                 res.add(item);
-                item = new StatsDTO();
-                item.setLabel("priceSales");
-                item.setValue(stock.getStats().getPriceSales());
-                item.setDataType("number");
+                item = new StatsDTO("revenue", "number", stock.getStats().getRevenue());
                 res.add(item);
-                item = new StatsDTO();
-                item.setLabel("revenue");
-                item.setValue(stock.getStats().getRevenue());
-                item.setDataType("number");
+                item = new StatsDTO("oneYearTargetPrice", "number", stock.getStats().getOneYearTargetPrice());
                 res.add(item);
-                item = new StatsDTO();
-                item.setLabel("oneYearTargetPrice");
-                item.setValue(stock.getStats().getOneYearTargetPrice());
-                item.setDataType("number");
+
+                JsonObject summary = utils.getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
+                                + ticker + "?modules=defaultKeyStatistics");
+                JsonObject qs = summary.getAsJsonObject("quoteSummary");
+                JsonObject results = qs.get("result").getAsJsonArray().get(0).getAsJsonObject()
+                                .get("defaultKeyStatistics").getAsJsonObject();
+
+                item = new StatsDTO("forwardPE", "string",
+                                results.get("forwardPE").getAsJsonObject().get("fmt") != null
+                                                ? results.get("forwardPE").getAsJsonObject().get("fmt").getAsString()
+                                                : null);
                 res.add(item);
-                item = new StatsDTO();
+                item = new StatsDTO("profitMargins", "string",
+                                results.get("profitMargins").getAsJsonObject().get("fmt") != null ? results
+                                                .get("profitMargins").getAsJsonObject().get("fmt").getAsString()
+                                                : null);
+                res.add(item);
+                item = new StatsDTO("sharesPercentSharesOut", "string",
+                                results.get("sharesPercentSharesOut").getAsJsonObject().get("fmt") != null
+                                                ? results.get("sharesPercentSharesOut").getAsJsonObject().get("fmt")
+                                                                .getAsString()
+                                                : null);
+                res.add(item);
+                item = new StatsDTO("heldPercentInsiders", "string",
+                                results.get("heldPercentInsiders").getAsJsonObject().get("fmt") != null ? results
+                                                .get("heldPercentInsiders").getAsJsonObject().get("fmt").getAsString()
+                                                : null);
+                res.add(item);
+                item = new StatsDTO("heldPercentInstitutions", "string",
+                                results.get("heldPercentInstitutions").getAsJsonObject().get("fmt") != null
+                                                ? results.get("heldPercentInstitutions").getAsJsonObject().get("fmt")
+                                                                .getAsString()
+                                                : null);
+                res.add(item);
+                item = new StatsDTO("beta", "number",
+                                results.get("beta").getAsJsonObject().get("fmt") != null
+                                                ? results.get("beta").getAsJsonObject().get("fmt").getAsBigDecimal()
+                                                : null);
+                res.add(item);
+                item = new StatsDTO("earningsQuarterlyGrowth", "string",
+                                results.get("earningsQuarterlyGrowth").getAsJsonObject().get("fmt") != null
+                                                ? results.get("earningsQuarterlyGrowth").getAsJsonObject().get("fmt")
+                                                                .getAsString()
+                                                : null);
+                res.add(item);
+                item = new StatsDTO("mostRecentQuarter", "date",
+                                results.get("mostRecentQuarter").getAsJsonObject().get("raw") != null ? results
+                                                .get("mostRecentQuarter").getAsJsonObject().get("raw").getAsBigInteger()
+                                                : null);
+                res.add(item);
+                item = new StatsDTO("netIncomeToCommon", "string",
+                                results.get("netIncomeToCommon").getAsJsonObject().get("fmt") != null ? results
+                                                .get("netIncomeToCommon").getAsJsonObject().get("fmt").getAsString()
+                                                : null);
+                res.add(item);
+                item = new StatsDTO("forwardEps", "number",
+                                results.get("forwardEps").getAsJsonObject().get("fmt") != null ? results
+                                                .get("forwardEps").getAsJsonObject().get("fmt").getAsBigDecimal()
+                                                : null);
+                res.add(item);
+                item = new StatsDTO("enterpriseToRevenue", "number",
+                                results.get("enterpriseToRevenue").getAsJsonObject().get("fmt") != null
+                                                ? results.get("enterpriseToRevenue").getAsJsonObject().get("fmt")
+                                                                .getAsBigDecimal()
+                                                : null);
+                res.add(item);
+                item = new StatsDTO("enterpriseToEbitda", "number",
+                                results.get("enterpriseToEbitda").getAsJsonObject().get("fmt") != null
+                                                ? results.get("enterpriseToEbitda").getAsJsonObject().get("fmt")
+                                                                .getAsBigDecimal()
+                                                : null);
+                res.add(item);
+                item = new StatsDTO("52WeekChange", "string",
+                                results.get("52WeekChange").getAsJsonObject().get("fmt") != null
+                                                ? results.get("52WeekChange").getAsJsonObject().get("fmt").getAsString()
+                                                : null);
+                res.add(item);
+                item = new StatsDTO("lastDividendValue", "number",
+                                results.get("lastDividendValue").getAsJsonObject().get("fmt") != null ? results
+                                                .get("lastDividendValue").getAsJsonObject().get("fmt").getAsBigDecimal()
+                                                : null);
+                res.add(item);
+                item = new StatsDTO("lastDividendDate", "date",
+                                results.get("lastDividendDate").getAsJsonObject().get("raw") != null ? results
+                                                .get("lastDividendDate").getAsJsonObject().get("raw").getAsBigInteger()
+                                                : null);
+                res.add(item);
                 // item.setLabel("earningsAnnouncement");
                 // item.setValue(stock.getStats().getEarningsAnnouncement());
                 // item.setDataType("date");
@@ -177,11 +272,12 @@ public class StockDataService {
 
         /**
          * Return the results from a ticker from a respective module
-         * @param module the type o information to be quered
-         * Examples of modules: 'assetProfile','summaryProfile','summaryDetail','esgScores','price','incomeStatementHistory','incomeStatementHistoryQuarterly',
-         * 'balanceSheetHistory','balanceSheetHistoryQuarterly','cashflowStatementHistory','cashflowStatementHistoryQuarterly','defaultKeyStatistics','financialData',
-         * 'calendarEvents','secFilings','recommendationTrend','upgradeDowngradeHistory','institutionOwnership','fundOwnership','majorDirectHolders','majorHoldersBreakdown',
-         * 'insiderTransactions','insiderHolders','netSharePurchaseActivity','earnings','earningsHistory','earningsTrend','industryTrend','indexTrend','sectorTrend'
+         * 
+         * @param module the type o information to be quered Examples of modules:
+         *               'assetProfile','summaryProfile','summaryDetail','esgScores','price','incomeStatementHistory','incomeStatementHistoryQuarterly',
+         *               'balanceSheetHistory','balanceSheetHistoryQuarterly','cashflowStatementHistory','cashflowStatementHistoryQuarterly','defaultKeyStatistics','financialData',
+         *               'calendarEvents','secFilings','recommendationTrend','upgradeDowngradeHistory','institutionOwnership','fundOwnership','majorDirectHolders','majorHoldersBreakdown',
+         *               'insiderTransactions','insiderHolders','netSharePurchaseActivity','earnings','earningsHistory','earningsTrend','industryTrend','indexTrend','sectorTrend'
          * @param ticker
          * @return The JsonObject of the respectiv module
          * @throws JsonIOException
@@ -196,7 +292,6 @@ public class StockDataService {
                 return qs.get("result").getAsJsonArray().get(0).getAsJsonObject().get(module).getAsJsonObject();
 
         }
-
 
         public ChartDTO getFinancialHistory(String ticker) throws IOException, ParseException {
 
@@ -218,7 +313,8 @@ public class StockDataService {
                                         q.getAsJsonObject().get("revenue").getAsJsonObject().get("fmt").getAsString());
                         fin.setValue(q.getAsJsonObject().get("revenue").getAsJsonObject().get("raw").getAsBigInteger());
                         try {
-                                fin.setDateEpoch(utils.getDateFromQuarter(q.getAsJsonObject().get("date").getAsString()));
+                                fin.setDateEpoch(utils
+                                                .getDateFromQuarter(q.getAsJsonObject().get("date").getAsString()));
                         } catch (ParseException e) {
                                 // TODO Auto-generated catch block
                                 e.printStackTrace();
@@ -272,41 +368,44 @@ public class StockDataService {
                 return res;
         }
 
-        public Map<String, Object> getData(String ticker) throws IOException {
+        public StockDataDTO getData(String ticker) throws IOException {
                 // public Map<String,Object> getData(String ticker) throws IOException{
 
-                Map<String, Object> res = new HashMap<>();
                 // Stock stock = YahooFinance.get(ticker);
                 JsonObject summary = utils.getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
                                 + ticker + "?modules=summaryProfile");
                 JsonObject qs = summary.getAsJsonObject("quoteSummary");
                 JsonObject results = qs.get("result").getAsJsonArray().get(0).getAsJsonObject().get("summaryProfile")
                                 .getAsJsonObject();
-                res.put("website", results.get("website") != null ? results.get("website").getAsString() : "");
-                res.put("industry", results.get("industry") != null ? results.get("industry").getAsString() : "");
-                res.put("sector", results.get("sector") != null ? results.get("sector").getAsString() : "");
-                res.put("longBusinessSummary",
-                                results.get("longBusinessSummary") != null
-                                                ? results.get("longBusinessSummary").getAsString()
-                                                : "");
+
+                StockDataDTO stockData = new StockDataDTO();
+                stockData.setTicker(ticker);
+                stockData.setWebsite(results.get("website") != null ? results.get("website").getAsString() : "");
+                stockData.setIndustry(results.get("industry") != null ? results.get("industry").getAsString() : "");
+                stockData.setSector(results.get("sector") != null ? results.get("sector").getAsString() : "");
+                stockData.setLongBusinessSummary(results.get("longBusinessSummary") != null
+                                ? results.get("longBusinessSummary").getAsString()
+                                : "");
+
                 summary = utils.getJsonFromURL("https://query1.finance.yahoo.com/v7/finance/quote?symbols=" + ticker);
                 results = summary.getAsJsonObject("quoteResponse").get("result").getAsJsonArray().get(0)
                                 .getAsJsonObject();
-                res.put("fullExchangeName",
+
+                stockData.setFullExchangeName(
                                 results.get("fullExchangeName") != null ? results.get("fullExchangeName").getAsString()
                                                 : "");
-                res.put("currency", results.get("currency") != null ? results.get("currency").getAsString() : "");
-                res.put("longName", results.get("longName") != null ? results.get("longName").getAsString() : "");
-                res.put("price", results.get("regularMarketPrice") != null
-                                ? results.get("regularMarketPrice").getAsBigDecimal()
-                                : "");
+                stockData.setCurrency(results.get("currency") != null ? results.get("currency").getAsString() : "");
+                stockData.setLongName(results.get("longName") != null ? results.get("longName").getAsString() : "");
+                stockData.setPrice(results.get("regularMarketPrice") != null ? results.get("regularMarketPrice").getAsBigDecimal()
+                                : new BigDecimal(-1));
 
-                return res;
+                return stockData;
 
         }
 
         /**
-         *  Given a ticker Return its current Price and Sector
+         * Given a ticker Return its current Price and Sector
+         * 
          * @param ticker ticker string ("AMZN", "WEGE3.SA"...)
          * @return Price and sector of the tick
          * @throws IOException

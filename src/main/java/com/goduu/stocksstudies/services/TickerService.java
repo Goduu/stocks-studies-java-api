@@ -34,6 +34,9 @@ public class TickerService {
 
 	@Autowired
 	private TickerRepository repo;
+	
+	@Autowired
+	private StockDataService dataService;
 
 	@Autowired
 	private Utils utils;
@@ -68,7 +71,7 @@ public class TickerService {
 
 				JsonObject financial = new JsonObject();
 				try {
-					financial = queryFinancial(s);
+					financial = dataService.queryFinancial(s,"1d","30m");
 				} catch (JsonIOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -117,23 +120,7 @@ public class TickerService {
 
 	}
 
-	/**
-	 * Query the price data for 1 day with the granularity of 30min
-	 * 
-	 * @param ticker Ticker to be searched
-	 * @return an object with the response
-	 * @throws JsonIOException
-	 * @throws JsonSyntaxException
-	 * @throws IOException
-	 */
-	public JsonObject queryFinancial(String ticker) throws JsonIOException, JsonSyntaxException, IOException {
-		JsonObject summary = utils.getJsonFromURL("https://query1.finance.yahoo.com/v7/finance/spark?symbols=" + ticker
-				+ "&range=1d&interval=30m&indicators=close&includeTimestamps=false&includePrePost=false&corsDomain=finance.yahoo.com&.tsrc=finance");
-		JsonObject qs = summary.getAsJsonObject("spark");
-		return qs.get("result").getAsJsonArray().get(0).getAsJsonObject().get("response").getAsJsonArray().get(0)
-				.getAsJsonObject();
-
-	}
+	
 
 
 }

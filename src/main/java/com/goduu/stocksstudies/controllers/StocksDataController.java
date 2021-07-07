@@ -10,6 +10,8 @@ import com.goduu.stocksstudies.dto.ChartDTO;
 import com.goduu.stocksstudies.dto.ChartDataDTO;
 import com.goduu.stocksstudies.dto.EsgDTO;
 import com.goduu.stocksstudies.dto.StatsDTO;
+import com.goduu.stocksstudies.dto.WatchlistElementDTO;
+import com.goduu.stocksstudies.models.StockDataDTO;
 import com.goduu.stocksstudies.services.StockDataService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +32,7 @@ public class StocksDataController {
 	private StockDataService service;
 
 	@RequestMapping(value = "/data/{ticker}", method = RequestMethod.GET)
-	public ResponseEntity<Map<String, Object>> getData(@PathVariable String ticker)
+	public ResponseEntity<StockDataDTO> getData(@PathVariable String ticker)
 			throws IOException, java.io.IOException {
 
 		return ResponseEntity.ok().body(service.getData(ticker));
@@ -90,6 +92,14 @@ public class StocksDataController {
 		return ResponseEntity.ok().body(service.getFinancialHistory(ticker));
 	}
 
+
+	@RequestMapping(value = "/getWatchlistData", method = RequestMethod.POST)
+	public ResponseEntity<List<WatchlistElementDTO>> getWatchlistData(@RequestBody List<String> tickers) {
+
+		List<WatchlistElementDTO> list = service.getWatchlistData(tickers);
+		
+		return ResponseEntity.ok().body(list);
+	}
 
 	@RequestMapping(value = "/testagg", method = RequestMethod.POST)
 	public ResponseEntity<Map<String, Object>> testaggregationAPI(@RequestBody Map<String, Long> quantities) {
