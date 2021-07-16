@@ -47,6 +47,13 @@ public class TickerService {
 
 		return repo.findAllByDescriptionAndTickerAndExchange(search, exchange, pageable).getContent();
 	}
+	
+	public List<Ticker> fetchTickersBySearch(String search, int pageSize) {
+
+		Pageable pageable = PageRequest.of(0, pageSize);
+
+		return repo.fetchTickersBySearch(search, pageable).getContent();
+	}
 
 	/**
 	 * Find up to 10 Trending stocks

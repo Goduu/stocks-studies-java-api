@@ -33,6 +33,16 @@ public class TickerController {
 		List<TickerDTO> listDto = list.stream().map(x -> new TickerDTO(x)).collect(Collectors.toList());
 		return ResponseEntity.ok().body(listDto);
 	}
+
+	@RequestMapping(value = "/search/{search}", method = RequestMethod.GET)
+	public ResponseEntity<List<TickerDTO>> fetchTickersBySearch(@PathVariable String search) {
+		if(search.equals("-all-")){
+			search = ".";
+		}
+		List<Ticker> list = service.fetchTickersBySearch(search, 15);
+		List<TickerDTO> listDto = list.stream().map(x -> new TickerDTO(x)).collect(Collectors.toList());
+		return ResponseEntity.ok().body(listDto);
+	}
 	
 	@RequestMapping(value = "trending/{exchange}", method = RequestMethod.GET)
 	public ResponseEntity<List<TickerDTO>> findTreddingByExchange(@PathVariable String exchange) throws JsonIOException, JsonSyntaxException, IOException {
