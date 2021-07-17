@@ -34,6 +34,9 @@ public interface TickerRepository extends MongoRepository<Ticker, String> {
             "},                                                                 "+ 
             "{'ticker': 1,'description':1, '_id': 0}")
     Page<Ticker> fetchTickersBySearch(String search, Pageable pageable);
+    
+    @Query("{ 'ticker': { '$in': ?0 }}")
+    Page<Ticker> fetchTickersInfosByList(List<String> list, Pageable pageable);
 
     Ticker findByTicker(String ticker);
 

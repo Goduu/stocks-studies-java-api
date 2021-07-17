@@ -1,14 +1,13 @@
 package com.goduu.stocksstudies.services;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.goduu.stocksstudies.dto.TickerDTO;
@@ -16,10 +15,8 @@ import com.goduu.stocksstudies.models.Ticker;
 import com.goduu.stocksstudies.repository.TickerRepository;
 import com.goduu.stocksstudies.utils.Utils;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +31,7 @@ public class TickerService {
 
 	@Autowired
 	private TickerRepository repo;
-	
+
 	@Autowired
 	private StockDataService dataService;
 
@@ -47,12 +44,89 @@ public class TickerService {
 
 		return repo.findAllByDescriptionAndTickerAndExchange(search, exchange, pageable).getContent();
 	}
-	
+
 	public List<Ticker> fetchTickersBySearch(String search, int pageSize) {
 
 		Pageable pageable = PageRequest.of(0, pageSize);
 
 		return repo.fetchTickersBySearch(search, pageable).getContent();
+	}
+
+	public List<Ticker> fetchTickersInfosByList(List<String> tickersList, int pageSize, int page) {
+
+		Pageable pageable = PageRequest.of(page, pageSize);
+
+		List<Ticker> list = repo.fetchTickersInfosByList(tickersList, pageable).getContent();
+
+		list = list.stream().map(el -> {
+			return checkUpdateDates(el);
+
+		}).collect(Collectors.toList());
+		return list;
+	}
+
+	public Ticker fetchTickersInfos(String tickerString) {
+
+		Ticker ticker = repo.findByTicker(tickerString);
+		ticker = checkUpdateDates(ticker);
+
+		return ticker;
+	}
+
+	private Ticker checkUpdateDates(Ticker ticker) {
+		Long now = new Date().getTime();
+		Long oneDay = 86400000L;
+		if (now - ticker.getKeyStatisticsLastUpdate() > 3 * oneDay) {
+			try {
+				ticker = updateTickerKeyStatistics(ticker);
+			} catch (JsonIOException | JsonSyntaxException | io.jsonwebtoken.io.IOException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		if (now - ticker.getFinancialDataLastUpdate() > oneDay) {
+			try {
+				ticker = updateTickerFinancialData(ticker);
+			} catch (JsonIOException | JsonSyntaxException | io.jsonwebtoken.io.IOException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		if (now - ticker.getSummaryDetailsLastUpdate() > 3 * oneDay) {
+			try {
+				ticker = updateTickerSummaryDetails(ticker);
+			} catch (JsonIOException | JsonSyntaxException | io.jsonwebtoken.io.IOException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		return ticker;
+
+	}
+
+	private Ticker updateTickerKeyStatistics(Ticker ticker)
+			throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
+
+		ticker = dataService.updateTickerKeyStatisticsInfos(ticker);
+		return repo.save(ticker);
+
+	}
+
+	private Ticker updateTickerFinancialData(Ticker ticker)
+			throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
+
+		ticker = dataService.updateTickerFinancialDataInfos(ticker);
+		return repo.save(ticker);
+
+	}
+
+	private Ticker updateTickerSummaryDetails(Ticker ticker)
+			throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
+
+		ticker = dataService.updateTickerSummaryDetailsInfos(ticker);
+		return repo.save(ticker);
+
 	}
 
 	/**
@@ -78,7 +152,7 @@ public class TickerService {
 
 				JsonObject financial = new JsonObject();
 				try {
-					financial = dataService.queryFinancial(s,"1d","30m");
+					financial = dataService.queryFinancial(s, "1d", "30m");
 				} catch (JsonIOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -120,14 +194,11 @@ public class TickerService {
 	 * @throws IOException
 	 */
 	public JsonArray queryTrending(String exchange) throws JsonIOException, JsonSyntaxException, IOException {
-		JsonObject summary = utils.getJsonFromURL(
-				"https://query1.finance.yahoo.com/v1/finance/trending/" + exchange + "?count=10");
+		JsonObject summary = utils
+				.getJsonFromURL("https://query1.finance.yahoo.com/v1/finance/trending/" + exchange + "?count=10");
 		JsonObject qs = summary.getAsJsonObject("finance");
 		return qs.get("result").getAsJsonArray().get(0).getAsJsonObject().get("quotes").getAsJsonArray();
 
 	}
-
-	
-
 
 }

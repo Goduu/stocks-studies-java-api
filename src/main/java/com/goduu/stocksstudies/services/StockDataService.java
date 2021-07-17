@@ -19,9 +19,10 @@ import com.goduu.stocksstudies.dto.EsgDTO;
 import com.goduu.stocksstudies.dto.FinancialDTO;
 import com.goduu.stocksstudies.dto.PortifolioElement;
 import com.goduu.stocksstudies.dto.StatsDTO;
+import com.goduu.stocksstudies.dto.StockDataDTO;
 import com.goduu.stocksstudies.dto.WatchlistElementDTO;
 import com.goduu.stocksstudies.models.Operation;
-import com.goduu.stocksstudies.models.StockDataDTO;
+import com.goduu.stocksstudies.models.Ticker;
 import com.goduu.stocksstudies.utils.Utils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonIOException;
@@ -51,6 +52,9 @@ public class StockDataService {
 
         @Autowired
         private Utils utils;
+        
+        @Autowired
+        private TickerService tickerService;
 
         public Map<String, Object> getIndic(String ticker) throws IOException {
 
@@ -82,14 +86,14 @@ public class StockDataService {
 
         }
 
-        public List<WatchlistElementDTO> getWatchlistData(List<String> tickers) {
+        public List<WatchlistElementDTO> getWatchlistData(List<String> tickers, int page) {
                 List<WatchlistElementDTO> response = new ArrayList<>();
-                tickers.forEach(t -> {
-                        try {
+                List<Ticker> tickerList = tickerService.fetchTickersInfosByList(tickers, 10, page);
+
+                tickerList.forEach(t -> {
+                        try {   
                                 WatchlistElementDTO el = new WatchlistElementDTO();
-                                el.setData(getData(t));
-                                el.setStatistics(getStats(t));
-                                JsonObject financial = queryFinancial(t, "7d", "1h");
+                                JsonObject financial = queryFinancial(t.getTicker(), "7d", "1h");
                                 JsonArray prices = financial.get("indicators").getAsJsonObject().get("quote")
                                                 .getAsJsonArray().get(0).getAsJsonObject().get("close")
                                                 .getAsJsonArray();
@@ -101,12 +105,15 @@ public class StockDataService {
                                 chart.setType("priceChart");
                                 chart.setValues(valueList);
                                 el.setPriceChart(chart);
+                                el.setTicker(t);
                                 response.add(el);
+                                
                         } catch (Exception e) {
                                 // TODO: handle exception
                                 System.out.println("ERROR : " + e);
                         }
                 });
+                
 
                 return response;
         }
@@ -270,6 +277,376 @@ public class StockDataService {
 
         }
 
+        public Ticker updateTickerFinancialDataInfos(Ticker ticker)
+                        throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
+                JsonObject summary = utils.getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
+                                + ticker.getTicker() + "?modules=financialData");
+                JsonObject qs = summary.getAsJsonObject("quoteSummary");
+                JsonObject results = qs.get("result").getAsJsonArray().get(0).getAsJsonObject().get("financialData")
+                                .getAsJsonObject();
+                ticker.getFinancialData().setCurrentRatio(
+                                results.get("currentRatio").getAsJsonObject().get("raw") != null ? results
+                                                .get("currentRatio").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getFinancialData().setDebtToEquity(
+                                results.get("debtToEquity").getAsJsonObject().get("raw") != null ? results
+                                                .get("debtToEquity").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getFinancialData().setEarningsGrowth(
+                                results.get("earningsGrowth").getAsJsonObject().get("raw") != null ? results
+                                                .get("earningsGrowth").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getFinancialData()
+                                .setEbitda(results.get("ebitda").getAsJsonObject().get("raw") != null
+                                                ? results.get("ebitda").getAsJsonObject().get("raw").getAsLong()
+                                                : null);
+                ticker.getFinancialData().setEbitdaMargins(
+                                results.get("ebitdaMargins").getAsJsonObject().get("raw") != null ? results
+                                                .get("ebitdaMargins").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getFinancialData()
+                                .setFreeCashflow(results.get("freeCashflow").getAsJsonObject().get("raw") != null
+                                                ? results.get("freeCashflow").getAsJsonObject().get("raw").getAsLong()
+                                                : null);
+                ticker.getFinancialData().setGrossMargins(
+                                results.get("grossMargins").getAsJsonObject().get("raw") != null ? results
+                                                .get("grossMargins").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getFinancialData()
+                                .setGrossProfits(results.get("grossProfits").getAsJsonObject().get("raw") != null
+                                                ? results.get("grossProfits").getAsJsonObject().get("raw").getAsLong()
+                                                : null);
+                ticker.getFinancialData().setNumberOfAnalystOpinions(
+                                results.get("numberOfAnalystOpinions").getAsJsonObject().get("raw") != null
+                                                ? results.get("numberOfAnalystOpinions").getAsJsonObject().get("raw")
+                                                                .getAsBigInteger()
+                                                : null);
+                ticker.getFinancialData()
+                                .setOperatingCashflow(
+                                                results.get("operatingCashflow").getAsJsonObject().get("raw") != null
+                                                                ? results.get("operatingCashflow").getAsJsonObject()
+                                                                                .get("raw").getAsLong()
+                                                                : null);
+                ticker.getFinancialData()
+                                .setOperatingMargins(
+                                                results.get("operatingMargins").getAsJsonObject().get("raw") != null
+                                                                ? results.get("operatingMargins").getAsJsonObject()
+                                                                                .get("raw").getAsBigDecimal()
+                                                                : null);
+                ticker.getFinancialData().setProfitMargins(
+                                results.get("profitMargins").getAsJsonObject().get("raw") != null ? results
+                                                .get("profitMargins").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getFinancialData()
+                                .setQuickRatio(results.get("quickRatio").getAsJsonObject().get("raw") != null ? results
+                                                .get("quickRatio").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getFinancialData()
+                                .setRecommendationKey(
+                                                !results.get("recommendationKey").isJsonNull()
+                                                                ? results.get("recommendationKey").getAsString()
+                                                                : null);
+                ticker.getFinancialData()
+                                .setRecommendationMean(
+                                                results.get("recommendationMean").getAsJsonObject().get("raw") != null
+                                                                ? results.get("recommendationMean").getAsJsonObject()
+                                                                                .get("raw").getAsBigDecimal()
+                                                                : null);
+                ticker.getFinancialData().setReturnOnAssets(
+                                results.get("returnOnAssets").getAsJsonObject().get("raw") != null ? results
+                                                .get("returnOnAssets").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getFinancialData().setReturnOnEquity(
+                                results.get("returnOnEquity").getAsJsonObject().get("raw") != null ? results
+                                                .get("returnOnEquity").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getFinancialData().setRevenueGrowth(
+                                results.get("revenueGrowth").getAsJsonObject().get("raw") != null ? results
+                                                .get("revenueGrowth").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getFinancialData()
+                                .setRevenuePerShare(
+                                                results.get("revenuePerShare").getAsJsonObject().get("raw") != null
+                                                                ? results.get("revenuePerShare").getAsJsonObject()
+                                                                                .get("raw").getAsBigDecimal()
+                                                                : null);
+                ticker.getFinancialData()
+                                .setTargetHighPrice(results.get("targetHighPrice").getAsJsonObject().get("raw") != null
+                                                ? results.get("targetHighPrice").getAsJsonObject().get("raw")
+                                                                .getAsBigDecimal()
+                                                : null);
+                ticker.getFinancialData().setTargetLowPrice(
+                                results.get("targetLowPrice").getAsJsonObject().get("raw") != null ? results
+                                                .get("targetLowPrice").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getFinancialData()
+                                .setTargetMeanPrice(
+                                                results.get("targetMeanPrice").getAsJsonObject().get("raw") != null
+                                                                ? results.get("targetMeanPrice").getAsJsonObject()
+                                                                                .get("raw").getAsBigDecimal()
+                                                                : null);
+                ticker.getFinancialData()
+                                .setTargetMedianPrice(
+                                                results.get("targetMedianPrice").getAsJsonObject().get("raw") != null
+                                                                ? results.get("targetMedianPrice").getAsJsonObject()
+                                                                                .get("raw").getAsBigDecimal()
+                                                                : null);
+                ticker.getFinancialData()
+                                .setTotalCash(results.get("totalCash").getAsJsonObject().get("raw") != null
+                                                ? results.get("totalCash").getAsJsonObject().get("raw").getAsLong()
+                                                : null);
+                ticker.getFinancialData()
+                                .setTotalCashPerShare(
+                                                results.get("totalCashPerShare").getAsJsonObject().get("raw") != null
+                                                                ? results.get("totalCashPerShare").getAsJsonObject()
+                                                                                .get("raw").getAsBigDecimal()
+                                                                : null);
+                ticker.getFinancialData()
+                                .setTotalDebt(results.get("totalDebt").getAsJsonObject().get("raw") != null
+                                                ? results.get("totalDebt").getAsJsonObject().get("raw").getAsLong()
+                                                : null);
+                ticker.getFinancialData()
+                                .setTotalRevenue(results.get("totalRevenue").getAsJsonObject().get("raw") != null
+                                                ? results.get("totalRevenue").getAsJsonObject().get("raw").getAsLong()
+                                                : null);
+                ticker.setFinancialDataLastUpdate(new Date().getTime());
+
+                return ticker;
+        }
+
+        public Ticker updateTickerSummaryDetailsInfos(Ticker ticker)
+                        throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
+                JsonObject summary = utils.getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
+                                + ticker.getTicker() + "?modules=summaryDetail");
+                JsonObject qs = summary.getAsJsonObject("quoteSummary");
+                JsonObject results = qs.get("result").getAsJsonArray().get(0).getAsJsonObject().get("summaryDetail")
+                                .getAsJsonObject();
+                ticker.getSummaryDetails().setAverageDailyVolume10Day(
+                                results.get("averageDailyVolume10Day").getAsJsonObject().get("raw") != null ? results
+                                                .get("averageDailyVolume10Day").getAsJsonObject().get("raw").getAsLong()
+                                                : null);
+                ticker.getSummaryDetails().setDividendYield(
+                                results.get("dividendYield").getAsJsonObject().get("raw") != null ? results
+                                                .get("dividendYield").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getSummaryDetails()
+                                .setFiftyDayAverage(
+                                                results.get("fiftyDayAverage").getAsJsonObject().get("raw") != null
+                                                                ? results.get("fiftyDayAverage").getAsJsonObject()
+                                                                                .get("raw").getAsBigDecimal()
+                                                                : null);
+                ticker.getSummaryDetails()
+                                .setFiftyTwoWeekHigh(
+                                                results.get("fiftyTwoWeekHigh").getAsJsonObject().get("raw") != null
+                                                                ? results.get("fiftyTwoWeekHigh").getAsJsonObject()
+                                                                                .get("raw").getAsBigDecimal()
+                                                                : null);
+                ticker.getSummaryDetails()
+                                .setFiftyTwoWeekLow(
+                                                results.get("fiftyTwoWeekLow").getAsJsonObject().get("raw") != null
+                                                                ? results.get("fiftyTwoWeekLow").getAsJsonObject()
+                                                                                .get("raw").getAsBigDecimal()
+                                                                : null);
+                ticker.getSummaryDetails().setFiveYearAvgDividendYield(
+                                results.get("fiveYearAvgDividendYield").getAsJsonObject().get("raw") != null
+                                                ? results.get("fiveYearAvgDividendYield").getAsJsonObject().get("raw")
+                                                                .getAsBigDecimal()
+                                                : null);
+                ticker.getSummaryDetails()
+                                .setMarketCap(results.get("marketCap").getAsJsonObject().get("raw") != null
+                                                ? results.get("marketCap").getAsJsonObject().get("raw").getAsLong()
+                                                : null);
+                ticker.getSummaryDetails().setPayoutRatio(
+                                results.get("payoutRatio").getAsJsonObject().get("raw") != null ? results
+                                                .get("payoutRatio").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getSummaryDetails().setPriceToSalesTrailing12Months(
+                                results.get("priceToSalesTrailing12Months").getAsJsonObject().get("raw") != null
+                                                ? results.get("priceToSalesTrailing12Months").getAsJsonObject()
+                                                                .get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getSummaryDetails().setTrailingAnnualDividendRate(
+                                results.get("trailingAnnualDividendRate").getAsJsonObject().get("raw") != null
+                                                ? results.get("trailingAnnualDividendRate").getAsJsonObject().get("raw")
+                                                                .getAsBigDecimal()
+                                                : null);
+                ticker.getSummaryDetails().setTrailingAnnualDividendYield(
+                                results.get("trailingAnnualDividendYield").getAsJsonObject().get("raw") != null
+                                                ? results.get("trailingAnnualDividendYield").getAsJsonObject()
+                                                                .get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getSummaryDetails()
+                                .setTrailingPE(results.get("trailingPE") != null  ? results
+                                                .get("trailingPE").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getSummaryDetails()
+                                .setTwoHundredDayAverage(
+                                                results.get("twoHundredDayAverage").getAsJsonObject().get("raw") != null
+                                                                ? results.get("twoHundredDayAverage").getAsJsonObject()
+                                                                                .get("raw").getAsBigDecimal()
+                                                                : null);
+                ticker.getSummaryDetails()
+                                .setVolume(results.get("volume").getAsJsonObject().get("raw") != null
+                                                ? results.get("volume").getAsJsonObject().get("raw").getAsLong()
+                                                : null);
+                ticker.setSummaryDetailsLastUpdate(new Date().getTime());
+
+                return ticker;
+        }
+
+        public Ticker updateTickerKeyStatisticsInfos(Ticker ticker)
+                        throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
+                JsonObject summary = utils.getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
+                                + ticker.getTicker() + "?modules=defaultKeyStatistics");
+                JsonObject qs = summary.getAsJsonObject("quoteSummary");
+                JsonObject results = qs.get("result").getAsJsonArray().get(0).getAsJsonObject()
+                                .get("defaultKeyStatistics").getAsJsonObject();
+                ticker.getKeyStatistics()
+                                .setBeta(results.get("beta").getAsJsonObject().get("raw") != null
+                                                ? results.get("beta").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getKeyStatistics()
+                                .setBookValue(results.get("bookValue").getAsJsonObject().get("raw") != null ? results
+                                                .get("bookValue").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getKeyStatistics().setChange52Week(
+                                results.get("52WeekChange").getAsJsonObject().get("raw") != null ? results
+                                                .get("52WeekChange").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getKeyStatistics()
+                                .setDateShortInterest(
+                                                results.get("dateShortInterest").getAsJsonObject().get("raw") != null
+                                                                ? results.get("dateShortInterest").getAsJsonObject()
+                                                                                .get("raw").getAsLong()
+                                                                : null);
+                ticker.getKeyStatistics().setEarningsQuarterlyGrowth(
+                                results.get("earningsQuarterlyGrowth").getAsJsonObject().get("raw") != null
+                                                ? results.get("earningsQuarterlyGrowth").getAsJsonObject().get("raw")
+                                                                .getAsBigDecimal()
+                                                : null);
+                ticker.getKeyStatistics()
+                                .setEnterpriseToEbitda(
+                                                results.get("enterpriseToEbitda").getAsJsonObject().get("raw") != null
+                                                                ? results.get("enterpriseToEbitda").getAsJsonObject()
+                                                                                .get("raw").getAsBigDecimal()
+                                                                : null);
+                ticker.getKeyStatistics()
+                                .setEnterpriseToRevenue(
+                                                results.get("enterpriseToRevenue").getAsJsonObject().get("raw") != null
+                                                                ? results.get("enterpriseToRevenue").getAsJsonObject()
+                                                                                .get("raw").getAsBigDecimal()
+                                                                : null);
+                ticker.getKeyStatistics()
+                                .setEnterpriseValue(
+                                                results.get("enterpriseValue").getAsJsonObject().get("raw") != null
+                                                                ? results.get("enterpriseValue").getAsJsonObject()
+                                                                                .get("raw").getAsLong()
+                                                                : null);
+                ticker.getKeyStatistics()
+                                .setFloatShares(results.get("floatShares").getAsJsonObject().get("raw") != null
+                                                ? results.get("floatShares").getAsJsonObject().get("raw").getAsLong()
+                                                : null);
+                ticker.getKeyStatistics()
+                                .setForwardEps(results.get("forwardEps").getAsJsonObject().get("raw") != null ? results
+                                                .get("forwardEps").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getKeyStatistics()
+                                .setForwardPE(results.get("forwardPE").getAsJsonObject().get("raw") != null ? results
+                                                .get("forwardPE").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getKeyStatistics().setHeldPercentInstitutions(
+                                results.get("heldPercentInstitutions").getAsJsonObject().get("raw") != null
+                                                ? results.get("heldPercentInstitutions").getAsJsonObject().get("raw")
+                                                                .getAsBigDecimal()
+                                                : null);
+                ticker.getKeyStatistics()
+                                .setLastDividendDate(
+                                                results.get("lastDividendDate").getAsJsonObject().get("raw") != null
+                                                                ? results.get("lastDividendDate").getAsJsonObject()
+                                                                                .get("raw").getAsLong()
+                                                                : null);
+                ticker.getKeyStatistics()
+                                .setLastDividendValue(
+                                                results.get("lastDividendValue").getAsJsonObject().get("raw") != null
+                                                                ? results.get("lastDividendValue").getAsJsonObject()
+                                                                                .get("raw").getAsBigDecimal()
+                                                                : null);
+                ticker.getKeyStatistics()
+                                .setLastSplitFactor(!results.get("lastSplitFactor").isJsonNull()
+                                                ? results.get("lastSplitFactor").getAsString()
+                                                : null);
+                ticker.getKeyStatistics()
+                                .setMostRecentQuarter(
+                                                results.get("mostRecentQuarter").getAsJsonObject().get("raw") != null
+                                                                ? results.get("mostRecentQuarter").getAsJsonObject()
+                                                                                .get("raw").getAsLong()
+                                                                : null);
+                ticker.getKeyStatistics()
+                                .setNetIncomeToCommon(
+                                                results.get("netIncomeToCommon").getAsJsonObject().get("raw") != null
+                                                                ? results.get("netIncomeToCommon").getAsJsonObject()
+                                                                                .get("raw").getAsLong()
+                                                                : null);
+                ticker.getKeyStatistics()
+                                .setNextFiscalYearEnd(
+                                                results.get("nextFiscalYearEnd").getAsJsonObject().get("raw") != null
+                                                                ? results.get("nextFiscalYearEnd").getAsJsonObject()
+                                                                                .get("raw").getAsLong()
+                                                                : null);
+                ticker.getKeyStatistics()
+                                .setPegRatio(results.get("pegRatio").getAsJsonObject().get("raw") != null
+                                                ? results.get("pegRatio").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getKeyStatistics().setPriceToBook(results.get("priceToBook").getAsJsonObject().get("raw") != null
+                                ? results.get("priceToBook").getAsJsonObject().get("raw").getAsBigDecimal()
+                                : null);
+                ticker.getKeyStatistics().setProfitMargins(
+                                results.get("profitMargins").getAsJsonObject().get("raw") != null ? results
+                                                .get("profitMargins").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getKeyStatistics()
+                                .setSandP52WeekChange(
+                                                results.get("SandP52WeekChange").getAsJsonObject().get("raw") != null
+                                                                ? results.get("SandP52WeekChange").getAsJsonObject()
+                                                                                .get("raw").getAsBigDecimal()
+                                                                : null);
+                ticker.getKeyStatistics()
+                                .setSharesOutstanding(
+                                                results.get("sharesOutstanding").getAsJsonObject().get("raw") != null
+                                                                ? results.get("sharesOutstanding").getAsJsonObject()
+                                                                                .get("raw").getAsLong()
+                                                                : null);
+                ticker.getKeyStatistics().setSharesPercentSharesOut(
+                                results.get("sharesPercentSharesOut").getAsJsonObject().get("raw") != null
+                                                ? results.get("sharesPercentSharesOut").getAsJsonObject().get("raw")
+                                                                .getAsBigDecimal()
+                                                : null);
+                ticker.getKeyStatistics()
+                                .setSharesShort(results.get("sharesShort").getAsJsonObject().get("raw") != null
+                                                ? results.get("sharesShort").getAsJsonObject().get("raw").getAsLong()
+                                                : null);
+                ticker.getKeyStatistics().setSharesShortPriorMonth(
+                                results.get("sharesShortPriorMonth").getAsJsonObject().get("raw") != null ? results
+                                                .get("sharesShortPriorMonth").getAsJsonObject().get("raw").getAsLong()
+                                                : null);
+                ticker.getKeyStatistics()
+                                .setShortPercentOfFloat(
+                                                results.get("shortPercentOfFloat").getAsJsonObject().get("raw") != null
+                                                                ? results.get("shortPercentOfFloat").getAsJsonObject()
+                                                                                .get("raw").getAsBigDecimal()
+                                                                : null);
+                ticker.getKeyStatistics()
+                                .setShortRatio(results.get("shortRatio").getAsJsonObject().get("raw") != null ? results
+                                                .get("shortRatio").getAsJsonObject().get("raw").getAsBigDecimal()
+                                                : null);
+                ticker.getKeyStatistics().setTrailingEps(results.get("trailingEps").getAsJsonObject().get("raw") != null
+                                ? results.get("trailingEps").getAsJsonObject().get("raw").getAsBigDecimal()
+                                : null);
+                ticker.setKeyStatisticsLastUpdate(new Date().getTime());
+                return ticker;
+
+        }
+
         /**
          * Return the results from a ticker from a respective module
          * 
@@ -396,7 +773,8 @@ public class StockDataService {
                                                 : "");
                 stockData.setCurrency(results.get("currency") != null ? results.get("currency").getAsString() : "");
                 stockData.setLongName(results.get("longName") != null ? results.get("longName").getAsString() : "");
-                stockData.setPrice(results.get("regularMarketPrice") != null ? results.get("regularMarketPrice").getAsBigDecimal()
+                stockData.setPrice(results.get("regularMarketPrice") != null
+                                ? results.get("regularMarketPrice").getAsBigDecimal()
                                 : new BigDecimal(-1));
 
                 return stockData;

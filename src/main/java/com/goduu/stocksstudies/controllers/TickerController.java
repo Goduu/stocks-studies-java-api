@@ -13,6 +13,7 @@ import com.google.gson.JsonSyntaxException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,6 +43,13 @@ public class TickerController {
 		List<Ticker> list = service.fetchTickersBySearch(search, 15);
 		List<TickerDTO> listDto = list.stream().map(x -> new TickerDTO(x)).collect(Collectors.toList());
 		return ResponseEntity.ok().body(listDto);
+	}
+	
+	@RequestMapping(value = "/fetchTickersInfosByList", method = RequestMethod.POST)
+	public ResponseEntity<List<Ticker>> fetchTickersBySearch(@RequestBody List<String> tickerList) {
+		
+		List<Ticker> list = service.fetchTickersInfosByList(tickerList, 15);
+		return ResponseEntity.ok().body(list);
 	}
 	
 	@RequestMapping(value = "trending/{exchange}", method = RequestMethod.GET)

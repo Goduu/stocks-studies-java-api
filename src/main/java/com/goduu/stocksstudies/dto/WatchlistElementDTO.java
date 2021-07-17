@@ -3,7 +3,7 @@ package com.goduu.stocksstudies.dto;
 import java.io.Serializable;
 import java.util.List;
 
-import com.goduu.stocksstudies.models.StockDataDTO;
+import com.goduu.stocksstudies.models.Ticker;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,9 +16,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class WatchlistElementDTO implements Serializable{
     
-    private StockDataDTO data;
-
     private ChartDTO priceChart;
 
-    private List<StatsDTO> statistics;
+    private Ticker ticker;
 }

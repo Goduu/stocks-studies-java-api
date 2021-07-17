@@ -10,8 +10,8 @@ import com.goduu.stocksstudies.dto.ChartDTO;
 import com.goduu.stocksstudies.dto.ChartDataDTO;
 import com.goduu.stocksstudies.dto.EsgDTO;
 import com.goduu.stocksstudies.dto.StatsDTO;
+import com.goduu.stocksstudies.dto.StockDataDTO;
 import com.goduu.stocksstudies.dto.WatchlistElementDTO;
-import com.goduu.stocksstudies.models.StockDataDTO;
 import com.goduu.stocksstudies.services.StockDataService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,10 +93,10 @@ public class StocksDataController {
 	}
 
 
-	@RequestMapping(value = "/getWatchlistData", method = RequestMethod.POST)
-	public ResponseEntity<List<WatchlistElementDTO>> getWatchlistData(@RequestBody List<String> tickers) {
+	@RequestMapping(value = "/getWatchlistData/{page}", method = RequestMethod.POST)
+	public ResponseEntity<List<WatchlistElementDTO>> getWatchlistData(@RequestBody List<String> tickers,@PathVariable int page) {
 
-		List<WatchlistElementDTO> list = service.getWatchlistData(tickers);
+		List<WatchlistElementDTO> list = service.getWatchlistData(tickers,page);
 		
 		return ResponseEntity.ok().body(list);
 	}
