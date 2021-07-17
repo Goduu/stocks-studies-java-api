@@ -48,7 +48,7 @@ public class TickerController {
 	@RequestMapping(value = "/fetchTickersInfosByList", method = RequestMethod.POST)
 	public ResponseEntity<List<Ticker>> fetchTickersBySearch(@RequestBody List<String> tickerList) {
 		
-		List<Ticker> list = service.fetchTickersInfosByList(tickerList, 15);
+		List<Ticker> list = service.fetchTickersInfosByList(tickerList, 15,0);
 		return ResponseEntity.ok().body(list);
 	}
 	
