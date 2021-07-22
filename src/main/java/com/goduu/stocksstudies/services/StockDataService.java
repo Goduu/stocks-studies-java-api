@@ -52,7 +52,7 @@ public class StockDataService {
 
         @Autowired
         private Utils utils;
-        
+
         @Autowired
         private TickerService tickerService;
 
@@ -86,12 +86,12 @@ public class StockDataService {
 
         }
 
-        public List<WatchlistElementDTO> getWatchlistData(List<String> tickers, int page) {
+        public List<WatchlistElementDTO> getWatchlistData(List<String> tickers, String sortedBy, int page) {
                 List<WatchlistElementDTO> response = new ArrayList<>();
-                List<Ticker> tickerList = tickerService.fetchTickersInfosByList(tickers, 10, page);
+                List<Ticker> tickerList = tickerService.fetchTickersInfosByList(tickers, 10, sortedBy, page);
 
                 tickerList.forEach(t -> {
-                        try {   
+                        try {
                                 WatchlistElementDTO el = new WatchlistElementDTO();
                                 JsonObject financial = queryFinancial(t.getTicker(), "7d", "1h");
                                 JsonArray prices = financial.get("indicators").getAsJsonObject().get("quote")
@@ -107,13 +107,12 @@ public class StockDataService {
                                 el.setPriceChart(chart);
                                 el.setTicker(t);
                                 response.add(el);
-                                
+
                         } catch (Exception e) {
                                 // TODO: handle exception
                                 System.out.println("ERROR : " + e);
                         }
                 });
-                
 
                 return response;
         }
@@ -342,10 +341,9 @@ public class StockDataService {
                                                 .get("quickRatio").getAsJsonObject().get("raw").getAsBigDecimal()
                                                 : null);
                 ticker.getFinancialData()
-                                .setRecommendationKey(
-                                                !results.get("recommendationKey").isJsonNull()
-                                                                ? results.get("recommendationKey").getAsString()
-                                                                : null);
+                                .setRecommendationKey(!results.get("recommendationKey").isJsonNull()
+                                                ? results.get("recommendationKey").getAsString()
+                                                : null);
                 ticker.getFinancialData()
                                 .setRecommendationMean(
                                                 results.get("recommendationMean").getAsJsonObject().get("raw") != null
@@ -371,10 +369,11 @@ public class StockDataService {
                                                                                 .get("raw").getAsBigDecimal()
                                                                 : null);
                 ticker.getFinancialData()
-                                .setTargetHighPrice(results.get("targetHighPrice").getAsJsonObject().get("raw") != null
-                                                ? results.get("targetHighPrice").getAsJsonObject().get("raw")
-                                                                .getAsBigDecimal()
-                                                : null);
+                                .setTargetHighPrice(
+                                                results.get("targetHighPrice").getAsJsonObject().get("raw") != null
+                                                                ? results.get("targetHighPrice").getAsJsonObject()
+                                                                                .get("raw").getAsBigDecimal()
+                                                                : null);
                 ticker.getFinancialData().setTargetLowPrice(
                                 results.get("targetLowPrice").getAsJsonObject().get("raw") != null ? results
                                                 .get("targetLowPrice").getAsJsonObject().get("raw").getAsBigDecimal()
@@ -475,10 +474,9 @@ public class StockDataService {
                                                 ? results.get("trailingAnnualDividendYield").getAsJsonObject()
                                                                 .get("raw").getAsBigDecimal()
                                                 : null);
-                ticker.getSummaryDetails()
-                                .setTrailingPE(results.get("trailingPE") != null  ? results
-                                                .get("trailingPE").getAsJsonObject().get("raw").getAsBigDecimal()
-                                                : null);
+                ticker.getSummaryDetails().setTrailingPE(results.get("trailingPE") != null
+                                ? results.get("trailingPE").getAsJsonObject().get("raw").getAsBigDecimal()
+                                : null);
                 ticker.getSummaryDetails()
                                 .setTwoHundredDayAverage(
                                                 results.get("twoHundredDayAverage").getAsJsonObject().get("raw") != null

@@ -52,6 +52,13 @@ public class TickerController {
 		return ResponseEntity.ok().body(list);
 	}
 	
+	@RequestMapping(value = "/fetchTickerData/{tickerString}", method = RequestMethod.GET)
+	public ResponseEntity<Ticker> fetchTickerData(@PathVariable String tickerString) {
+		
+		Ticker ticker = service.fetchTickersInfos(tickerString);
+		return ResponseEntity.ok().body(ticker);
+	}
+	
 	@RequestMapping(value = "trending/{exchange}", method = RequestMethod.GET)
 	public ResponseEntity<List<TickerDTO>> findTreddingByExchange(@PathVariable String exchange) throws JsonIOException, JsonSyntaxException, IOException {
 

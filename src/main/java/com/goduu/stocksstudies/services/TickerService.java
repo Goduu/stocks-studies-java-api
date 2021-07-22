@@ -2,11 +2,11 @@ package com.goduu.stocksstudies.services;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -52,9 +54,11 @@ public class TickerService {
 		return repo.fetchTickersBySearch(search, pageable).getContent();
 	}
 
-	public List<Ticker> fetchTickersInfosByList(List<String> tickersList, int pageSize, int page) {
+	public List<Ticker> fetchTickersInfosByList(List<String> tickersList, int pageSize, String sortedBy, int page) {
 
-		Pageable pageable = PageRequest.of(page, pageSize);
+		Pageable pageable = PageRequest.of(page, pageSize,Sort.by(Sort.Direction.ASC, sortedBy));
+		// Pageable pageable = PageRequest.of(page, pageSize,Sort.by(Sort.Direction.ASC, "keyStatistics.enterpriseValue"));
+		
 
 		List<Ticker> list = repo.fetchTickersInfosByList(tickersList, pageable).getContent();
 
