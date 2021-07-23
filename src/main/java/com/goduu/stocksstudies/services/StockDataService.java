@@ -86,14 +86,15 @@ public class StockDataService {
 
         }
 
-        public List<WatchlistElementDTO> getWatchlistData(List<String> tickers, String sortedBy, int page) {
+        public List<WatchlistElementDTO> getWatchlistData(List<String> tickers, int page, String sortedBy,
+                        String direction) {
                 List<WatchlistElementDTO> response = new ArrayList<>();
-                List<Ticker> tickerList = tickerService.fetchTickersInfosByList(tickers, 10, sortedBy, page);
+                List<Ticker> tickerList = tickerService.fetchTickersInfosByList(tickers, 50, page, sortedBy, direction);
 
                 tickerList.forEach(t -> {
                         try {
                                 WatchlistElementDTO el = new WatchlistElementDTO();
-                                JsonObject financial = queryFinancial(t.getTicker(), "7d", "1h");
+                                JsonObject financial = queryFinancial(t.getTicker(), "7mo", "1d");
                                 JsonArray prices = financial.get("indicators").getAsJsonObject().get("quote")
                                                 .getAsJsonArray().get(0).getAsJsonObject().get("close")
                                                 .getAsJsonArray();
@@ -413,6 +414,27 @@ public class StockDataService {
                 return ticker;
         }
 
+        public Ticker updateTickerSummaryProfile(Ticker ticker)
+                        throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
+                JsonObject summary = utils.getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
+                                + ticker.getTicker() + "?modules=summaryProfile");
+                JsonObject qs = summary.getAsJsonObject("quoteSummary");
+                JsonObject results = qs.get("result").getAsJsonArray().get(0).getAsJsonObject().get("summaryProfile")
+                                .getAsJsonObject();
+                ticker.getSummaryProfile().setCountry(
+                                results.get("country") != null ? results.get("country").getAsString() : null);
+                ticker.getSummaryProfile().setIndustry(
+                                results.get("industry") != null ? results.get("industry").getAsString() : null);
+                ticker.getSummaryProfile().setSector(
+                                results.get("sector") != null ? results.get("sector").getAsString() : null);
+                ticker.getSummaryProfile().setWebsite(
+                                results.get("website") != null ? results.get("website").getAsString() : null);
+
+                ticker.setSummaryProfileLastUpdate(new Date().getTime());
+
+                return ticker;
+        }
+
         public Ticker updateTickerSummaryDetailsInfos(Ticker ticker)
                         throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
                 JsonObject summary = utils.getJsonFromURL("https://query2.finance.yahoo.com/v10/finance/quoteSummary/"
@@ -549,9 +571,11 @@ public class StockDataService {
                                                 .get("forwardEps").getAsJsonObject().get("raw").getAsBigDecimal()
                                                 : null);
                 ticker.getKeyStatistics()
-                                .setForwardPE(results.get("forwardPE").getAsJsonObject().get("raw") != null ? results
+                                .setForwardPE(results.get("forwardPE").getAsJsonObject().get("raw") != null ? 
+                                !results.get("forwardPE").getAsJsonObject().get("raw").getAsString().equals("Infinity") ? 
+                                results
                                                 .get("forwardPE").getAsJsonObject().get("raw").getAsBigDecimal()
-                                                : null);
+                                                : null : null);
                 ticker.getKeyStatistics().setHeldPercentInstitutions(
                                 results.get("heldPercentInstitutions").getAsJsonObject().get("raw") != null
                                                 ? results.get("heldPercentInstitutions").getAsJsonObject().get("raw")

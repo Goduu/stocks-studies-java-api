@@ -43,15 +43,17 @@ public class Ticker implements Serializable {
 	private KeyStatistics keyStatistics = new KeyStatistics();
 	private SummaryDetails summaryDetails = new SummaryDetails();
 	private FinancialData financialData = new FinancialData();
+	private SummaryProfile summaryProfile = new SummaryProfile();
 
 	private Long keyStatisticsLastUpdate = 0L;
 	private Long summaryDetailsLastUpdate = 0L;
 	private Long financialDataLastUpdate = 0L;
+	private Long summaryProfileLastUpdate = 0L;
 
 	@Getter
 	@Setter
 	@NoArgsConstructor
-    public class KeyStatistics implements Serializable {
+	public class KeyStatistics implements Serializable {
 
 		private Long enterpriseValue;
 		private BigDecimal forwardPE;
@@ -141,6 +143,17 @@ public class Ticker implements Serializable {
 		private BigDecimal ebitdaMargins;
 		private BigDecimal operatingMargins;
 		private BigDecimal profitMargins;
+
+	}
+
+	@Getter
+	@Setter
+	@NoArgsConstructor
+	public class SummaryProfile implements Serializable {
+		private String industry;
+		private String sector;
+		private String country;
+		private String website;
 
 	}
 

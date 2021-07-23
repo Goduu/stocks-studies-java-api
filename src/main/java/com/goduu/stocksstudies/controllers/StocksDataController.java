@@ -92,10 +92,14 @@ public class StocksDataController {
 		return ResponseEntity.ok().body(service.getFinancialHistory(ticker));
 	}
 
-	@RequestMapping(value = "/getWatchlistData/{sortedBy}/{page}", method = RequestMethod.POST)
-	public ResponseEntity<List<WatchlistElementDTO>> getWatchlistData(@RequestBody List<String> tickers,@PathVariable int page,@PathVariable String sortedBy) {
+	@RequestMapping(value = "/getWatchlistData/{page}/{sortedBy}/{direction}", method = RequestMethod.POST)
+	public ResponseEntity<List<WatchlistElementDTO>> getWatchlistData(
+		@RequestBody List<String> tickers,
+		@PathVariable int page,
+		@PathVariable String sortedBy,
+		@PathVariable String direction) {
 
-		List<WatchlistElementDTO> list = service.getWatchlistData(tickers,sortedBy,page);
+		List<WatchlistElementDTO> list = service.getWatchlistData(tickers,page,sortedBy,direction);
 		
 		return ResponseEntity.ok().body(list);
 	}

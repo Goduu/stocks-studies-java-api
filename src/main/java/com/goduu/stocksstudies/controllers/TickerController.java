@@ -26,8 +26,9 @@ public class TickerController {
 	private TickerService service;
 
 	@RequestMapping(value = "/{exchange}/{search}", method = RequestMethod.GET)
-	public ResponseEntity<List<TickerDTO>> findAllByDescriptionAndTickerAndExchange(@PathVariable String search,@PathVariable List<String> exchange) {
-		if(search.equals("-all-")){
+	public ResponseEntity<List<TickerDTO>> findAllByDescriptionAndTickerAndExchange(@PathVariable String search,
+			@PathVariable List<String> exchange) {
+		if (search.equals("-all-")) {
 			search = ".";
 		}
 		List<Ticker> list = service.findAllByDescriptionAndTickerAndExchange(search, exchange, 20);
@@ -37,35 +38,34 @@ public class TickerController {
 
 	@RequestMapping(value = "/search/{search}", method = RequestMethod.GET)
 	public ResponseEntity<List<TickerDTO>> fetchTickersBySearch(@PathVariable String search) {
-		if(search.equals("-all-")){
+		if (search.equals("-all-")) {
 			search = ".";
 		}
 		List<Ticker> list = service.fetchTickersBySearch(search, 15);
 		List<TickerDTO> listDto = list.stream().map(x -> new TickerDTO(x)).collect(Collectors.toList());
 		return ResponseEntity.ok().body(listDto);
 	}
-	
+
 	@RequestMapping(value = "/fetchTickersInfosByList", method = RequestMethod.POST)
 	public ResponseEntity<List<Ticker>> fetchTickersBySearch(@RequestBody List<String> tickerList) {
-		
-		List<Ticker> list = service.fetchTickersInfosByList(tickerList, 15,0);
+
+		List<Ticker> list = service.fetchTickersInfosByList(tickerList, 15, 0, "ticker", "ASC");
 		return ResponseEntity.ok().body(list);
 	}
-	
+
 	@RequestMapping(value = "/fetchTickerData/{tickerString}", method = RequestMethod.GET)
 	public ResponseEntity<Ticker> fetchTickerData(@PathVariable String tickerString) {
-		
+
 		Ticker ticker = service.fetchTickersInfos(tickerString);
 		return ResponseEntity.ok().body(ticker);
 	}
-	
+
 	@RequestMapping(value = "trending/{exchange}", method = RequestMethod.GET)
-	public ResponseEntity<List<TickerDTO>> findTreddingByExchange(@PathVariable String exchange) throws JsonIOException, JsonSyntaxException, IOException {
+	public ResponseEntity<List<TickerDTO>> findTreddingByExchange(@PathVariable String exchange)
+			throws JsonIOException, JsonSyntaxException, IOException {
 
 		List<TickerDTO> list = service.findTreddingByCountry(exchange);
 		return ResponseEntity.ok().body(list);
 	}
-
-	
 
 }

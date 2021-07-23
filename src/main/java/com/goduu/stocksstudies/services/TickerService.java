@@ -54,11 +54,12 @@ public class TickerService {
 		return repo.fetchTickersBySearch(search, pageable).getContent();
 	}
 
-	public List<Ticker> fetchTickersInfosByList(List<String> tickersList, int pageSize, String sortedBy, int page) {
-
-		Pageable pageable = PageRequest.of(page, pageSize,Sort.by(Sort.Direction.ASC, sortedBy));
-		// Pageable pageable = PageRequest.of(page, pageSize,Sort.by(Sort.Direction.ASC, "keyStatistics.enterpriseValue"));
-		
+	public List<Ticker> fetchTickersInfosByList(List<String> tickersList, int pageSize, int page, String sortedBy,
+			String direction) {
+		Sort.Direction dir = direction.equals("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
+		Pageable pageable = PageRequest.of(page, pageSize, Sort.by(dir, sortedBy));
+		// Pageable pageable = PageRequest.of(page, pageSize,Sort.by(Sort.Direction.ASC,
+		// "keyStatistics.enterpriseValue"));
 
 		List<Ticker> list = repo.fetchTickersInfosByList(tickersList, pageable).getContent();
 
@@ -104,6 +105,14 @@ public class TickerService {
 				e.printStackTrace();
 			}
 		}
+		if (now - ticker.getSummaryProfileLastUpdate() > 365 * oneDay) {
+			try {
+				ticker = updateTickerSummaryProfile(ticker);
+			} catch (JsonIOException | JsonSyntaxException | io.jsonwebtoken.io.IOException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 
 		return ticker;
 
@@ -129,6 +138,14 @@ public class TickerService {
 			throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
 
 		ticker = dataService.updateTickerSummaryDetailsInfos(ticker);
+		return repo.save(ticker);
+
+	}
+	
+	private Ticker updateTickerSummaryProfile(Ticker ticker)
+			throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
+
+		ticker = dataService.updateTickerSummaryProfile(ticker);
 		return repo.save(ticker);
 
 	}
