@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.goduu.stocksstudies.WorkshopmongoApplication.YahooResp;
 import com.goduu.stocksstudies.dto.ChartDTO;
 import com.goduu.stocksstudies.dto.ChartDataDTO;
 import com.goduu.stocksstudies.dto.EsgDTO;
@@ -21,8 +22,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import io.jsonwebtoken.io.IOException;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping(value = "/api/stocks")
@@ -102,6 +105,23 @@ public class StocksDataController {
 		List<WatchlistElementDTO> list = service.getWatchlistData(tickers,page,sortedBy,direction);
 		
 		return ResponseEntity.ok().body(list);
+	}
+	
+	@RequestMapping(value = "/testpaha", method = RequestMethod.GET)
+	public ResponseEntity<YahooResp> testpaha() {
+
+		String uri = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/AAPL?modules=summaryDetail";
+		// Mono<YahooResp> tweetFlux = WebClient.create().get().uri(uri).retrieve().bodyToMono(YahooResp.class).block();
+		Mono<YahooResp> datatest = WebClient.create().get().uri(uri).retrieve().bodyToMono(YahooResp.class).log();
+		
+		return ResponseEntity.ok().body(datatest.block());
+	}
+
+	public YahooResp test() {
+		String uri = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/AAPL?modules=summaryDetail";
+		Mono<YahooResp> tweetFlux = WebClient.create().get().uri(uri).retrieve().bodyToMono(YahooResp.class);
+
+		return tweetFlux.block();
 	}
 
 	@RequestMapping(value = "/testagg", method = RequestMethod.POST)

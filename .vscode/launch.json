@@ -6,6 +6,13 @@
         "name": "Launch WorkshopmongoApplication",
         "request": "launch",
         "mainClass": "com.goduu.stocksstudies.WorkshopmongoApplication",
+        "projectName": "stocksstudies"
+      },
+      {
+        "type": "java",
+        "name": "Launch WorkshopmongoApplication",
+        "request": "launch",
+        "mainClass": "com.goduu.stocksstudies.WorkshopmongoApplication",
         "projectName": "workshopmongo"
       },
       {

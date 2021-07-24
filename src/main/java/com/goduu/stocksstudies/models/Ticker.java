@@ -4,6 +4,11 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import com.goduu.stocksstudies.dto.TickerDataFinancialData;
+import com.goduu.stocksstudies.dto.TickerDataKeyStatistics;
+import com.goduu.stocksstudies.dto.TickerDataSummaryDetail;
+import com.goduu.stocksstudies.dto.TickerDataSummaryProfile;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -40,10 +45,10 @@ public class Ticker implements Serializable {
 
 	private Long accesses = 0L;
 
-	private KeyStatistics keyStatistics = new KeyStatistics();
-	private SummaryDetails summaryDetails = new SummaryDetails();
-	private FinancialData financialData = new FinancialData();
-	private SummaryProfile summaryProfile = new SummaryProfile();
+	private TickerDataKeyStatistics keyStatistics = new TickerDataKeyStatistics();
+	private TickerDataSummaryDetail summaryDetail = new TickerDataSummaryDetail();
+	private TickerDataFinancialData financialData = new TickerDataFinancialData();
+	private TickerDataSummaryProfile summaryProfile = new TickerDataSummaryProfile();
 
 	private Long keyStatisticsLastUpdate = 0L;
 	private Long summaryDetailsLastUpdate = 0L;
@@ -91,25 +96,7 @@ public class Ticker implements Serializable {
 	}
 
 	// https://query2.finance.yahoo.com/v10/finance/quoteSummary/AAPL?modules=summaryDetail
-	@Getter
-	@Setter
-	@NoArgsConstructor
-	public class SummaryDetails implements Serializable {
-		private BigDecimal dividendYield;
-		private BigDecimal payoutRatio;
-		private BigDecimal fiveYearAvgDividendYield;
-		private BigDecimal trailingPE;
-		private Long volume;
-		private Long averageDailyVolume10Day;
-		private Long marketCap;
-		private BigDecimal fiftyTwoWeekLow;
-		private BigDecimal fiftyTwoWeekHigh;
-		private BigDecimal priceToSalesTrailing12Months;
-		private BigDecimal fiftyDayAverage;
-		private BigDecimal twoHundredDayAverage;
-		private BigDecimal trailingAnnualDividendRate;
-		private BigDecimal trailingAnnualDividendYield;
-	}
+
 
 	// https://query2.finance.yahoo.com/v10/finance/quoteSummary/AAPL?modules=financialData
 	@Getter

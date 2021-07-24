@@ -45,12 +45,8 @@ public class TokenAuthenticationService {
   public String mintJWTHeader(String username) {
     SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
 
-    String JWT =
-        Jwts.builder()
-            .setSubject(username)
-            .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs))
-            .signWith(key)
-            .compact();
+    String JWT = Jwts.builder().setSubject(username)
+        .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationInMs)).signWith(key).compact();
     return TOKEN_PREFIX + " " + JWT;
   }
 
@@ -66,11 +62,8 @@ public class TokenAuthenticationService {
   public String getAuthenticationUser(String token) {
     try {
       SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
-      return Jwts.parser()
-          .setSigningKey(key)
-          .parseClaimsJws(trimToken(token))
-          .getBody()
-          .getSubject();
+      // return JWTParser.parse(token).getParsedString();
+      return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(trimToken(token)).getBody().getSubject();
     } catch (Exception e) {
       log.error("Cannot validate user token `{}`: error thrown - {}", token, e.getMessage());
     }
@@ -96,12 +89,8 @@ public class TokenAuthenticationService {
 
     // byte[] keyBytes = Decoder.BASE64.decode(jwtSecret);
     SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
-    
-    return Jwts.builder()
-        .setSubject(userPrincipal.getEmail())
-        .setIssuedAt(new Date())
-        .setExpiration(expiryDate)
-        .signWith(key)
-        .compact();
+
+    return Jwts.builder().setSubject(userPrincipal.getEmail()).setIssuedAt(new Date()).setExpiration(expiryDate)
+        .signWith(key).compact();
   }
 }

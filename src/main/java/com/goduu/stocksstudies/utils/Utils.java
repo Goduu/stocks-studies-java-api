@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -41,7 +42,7 @@ public class Utils {
         request.connect();
 
         // Convert to a JSON object to print data
-        JsonElement root = JsonParser.parseReader(new InputStreamReader((InputStream) request.getContent())); 
+        JsonElement root = JsonParser.parseReader(new InputStreamReader((InputStream) request.getContent(), StandardCharsets.UTF_8)); 
         JsonObject rootobj = root.getAsJsonObject(); // May be an array, may be an object.
         return rootobj;
     }
