@@ -16,6 +16,16 @@ public class TickerDataResponseDTO implements Serializable {
 
     private QuoteSummary quoteSummary;
 
+    private Chart chart;
+
+    @Getter
+    @Setter
+    public static class Chart {
+    
+        private List<TickerDataChart> result;
+    
+    }
+    
     @Getter
     @Setter
     public static class QuoteSummary {

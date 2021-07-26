@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.goduu.stocksstudies.WorkshopmongoApplication.YahooResp;
 import com.goduu.stocksstudies.dto.ChartDTO;
 import com.goduu.stocksstudies.dto.ChartDataDTO;
 import com.goduu.stocksstudies.dto.EsgDTO;
 import com.goduu.stocksstudies.dto.StatsDTO;
 import com.goduu.stocksstudies.dto.StockDataDTO;
 import com.goduu.stocksstudies.dto.WatchlistElementDTO;
+import com.goduu.stocksstudies.models.Ticker;
 import com.goduu.stocksstudies.services.StockDataService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,33 +96,17 @@ public class StocksDataController {
 	}
 
 	@RequestMapping(value = "/getWatchlistData/{page}/{sortedBy}/{direction}", method = RequestMethod.POST)
-	public ResponseEntity<List<WatchlistElementDTO>> getWatchlistData(
+	public ResponseEntity<List<Ticker>> getWatchlistData(
 		@RequestBody List<String> tickers,
 		@PathVariable int page,
 		@PathVariable String sortedBy,
 		@PathVariable String direction) {
 
-		List<WatchlistElementDTO> list = service.getWatchlistData(tickers,page,sortedBy,direction);
+		List<Ticker> list = service.getWatchlistData(tickers,page,sortedBy,direction);
 		
 		return ResponseEntity.ok().body(list);
 	}
 	
-	@RequestMapping(value = "/testpaha", method = RequestMethod.GET)
-	public ResponseEntity<YahooResp> testpaha() {
-
-		String uri = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/AAPL?modules=summaryDetail";
-		// Mono<YahooResp> tweetFlux = WebClient.create().get().uri(uri).retrieve().bodyToMono(YahooResp.class).block();
-		Mono<YahooResp> datatest = WebClient.create().get().uri(uri).retrieve().bodyToMono(YahooResp.class).log();
-		
-		return ResponseEntity.ok().body(datatest.block());
-	}
-
-	public YahooResp test() {
-		String uri = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/AAPL?modules=summaryDetail";
-		Mono<YahooResp> tweetFlux = WebClient.create().get().uri(uri).retrieve().bodyToMono(YahooResp.class);
-
-		return tweetFlux.block();
-	}
 
 	@RequestMapping(value = "/testagg", method = RequestMethod.POST)
 	public ResponseEntity<Map<String, Object>> testaggregationAPI(@RequestBody Map<String, Long> quantities) {

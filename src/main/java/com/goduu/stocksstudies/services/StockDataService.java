@@ -20,6 +20,7 @@ import com.goduu.stocksstudies.dto.FinancialDTO;
 import com.goduu.stocksstudies.dto.PortifolioElement;
 import com.goduu.stocksstudies.dto.StatsDTO;
 import com.goduu.stocksstudies.dto.StockDataDTO;
+import com.goduu.stocksstudies.dto.TickerDataChart.Quote;
 import com.goduu.stocksstudies.dto.TickerDataResponseDTO;
 import com.goduu.stocksstudies.dto.WatchlistElementDTO;
 import com.goduu.stocksstudies.models.Operation;
@@ -88,36 +89,11 @@ public class StockDataService {
 
         }
 
-        public List<WatchlistElementDTO> getWatchlistData(List<String> tickers, int page, String sortedBy,
-                        String direction) {
+        public List<Ticker> getWatchlistData(List<String> tickers, int page, String sortedBy, String direction) {
                 List<WatchlistElementDTO> response = new ArrayList<>();
                 List<Ticker> tickerList = tickerService.fetchTickersInfosByList(tickers, 50, page, sortedBy, direction);
 
-                tickerList.forEach(t -> {
-                        try {
-                                WatchlistElementDTO el = new WatchlistElementDTO();
-                                JsonObject financial = queryFinancial(t.getTicker(), "7mo", "1d");
-                                JsonArray prices = financial.get("indicators").getAsJsonObject().get("quote")
-                                                .getAsJsonArray().get(0).getAsJsonObject().get("close")
-                                                .getAsJsonArray();
-                                List<Object> valueList = new ArrayList<>();
-                                IntStream.range(0, prices.size()).forEach(idx -> {
-                                        valueList.add(prices.get(idx));
-                                });
-                                ChartDTO chart = new ChartDTO();
-                                chart.setType("priceChart");
-                                chart.setValues(valueList);
-                                el.setPriceChart(chart);
-                                el.setTicker(t);
-                                response.add(el);
-
-                        } catch (Exception e) {
-                                // TODO: handle exception
-                                System.out.println("ERROR : " + e);
-                        }
-                });
-
-                return response;
+                return tickerList;
         }
 
         /**
@@ -281,7 +257,8 @@ public class StockDataService {
 
         public Ticker updateTickerFinancialDataInfos(Ticker ticker)
                         throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
-                String uri = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/AAPL?modules=financialData";
+                String uri = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/" + ticker.getTicker()
+                                + "?modules=financialData";
                 TickerDataResponseDTO resp = WebClient.create().get().uri(uri).retrieve()
                                 .bodyToMono(TickerDataResponseDTO.class).block();
                 ticker.setFinancialData(resp.getQuoteSummary().getResult().get(0).getFinancialData());
@@ -292,7 +269,8 @@ public class StockDataService {
 
         public Ticker updateTickerSummaryProfile(Ticker ticker)
                         throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
-                String uri = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/AAPL?modules=summaryProfile";
+                String uri = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/" + ticker.getTicker()
+                                + "?modules=summaryProfile";
                 TickerDataResponseDTO resp = WebClient.create().get().uri(uri).retrieve()
                                 .bodyToMono(TickerDataResponseDTO.class).block();
                 ticker.setSummaryProfile(resp.getQuoteSummary().getResult().get(0).getSummaryProfile());
@@ -303,7 +281,8 @@ public class StockDataService {
         }
 
         public Ticker updateTickerSummaryDetailsInfos(Ticker ticker) {
-                String uri = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/AAPL?modules=summaryDetail";
+                String uri = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/" + ticker.getTicker()
+                                + "?modules=summaryDetail";
                 TickerDataResponseDTO resp = WebClient.create().get().uri(uri).retrieve()
                                 .bodyToMono(TickerDataResponseDTO.class).block();
                 ticker.setSummaryDetail(resp.getQuoteSummary().getResult().get(0).getSummaryDetail());
@@ -314,11 +293,40 @@ public class StockDataService {
 
         public Ticker updateTickerKeyStatisticsInfos(Ticker ticker)
                         throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
-                String uri = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/AAPL?modules=defaultKeyStatistics";
+                String uri = "https://query2.finance.yahoo.com/v10/finance/quoteSummary/" + ticker.getTicker()
+                                + "?modules=defaultKeyStatistics";
                 TickerDataResponseDTO resp = WebClient.create().get().uri(uri).retrieve()
                                 .bodyToMono(TickerDataResponseDTO.class).block();
                 ticker.setKeyStatistics(resp.getQuoteSummary().getResult().get(0).getDefaultKeyStatistics());
-                ticker.setFinancialDataLastUpdate(new Date().getTime());
+                ticker.setKeyStatisticsLastUpdate(new Date().getTime());
+                return ticker;
+
+        }
+
+        public Ticker updateTickerChart(Ticker ticker)
+                        throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
+                Long lastTime = ticker.getChartLastUpdate()/1000;
+                Long now = new Date().getTime() / 1000;
+                if (now - lastTime > 2 * 31556926L) {
+                        lastTime = now - 2 * 31556926L;
+                }
+                try {
+                        String uri = "https://query2.finance.yahoo.com/v8/finance/chart/" + ticker.getTicker()
+                                        + "?symbol=" + ticker.getTicker() + "&interval=1d&period1=" + lastTime
+                                        + "&period2=" + now;
+                        TickerDataResponseDTO resp = WebClient.create().get().uri(uri).retrieve()
+                                        .bodyToMono(TickerDataResponseDTO.class).block();
+                        List<Long> ts = resp.getChart().getResult().get(0).getTimestamp();
+                        List<Quote> qts = resp.getChart().getResult().get(0).getIndicators().getQuote();
+                        ticker.getChart().getTimestamp().addAll(ts);
+                        ticker.getChart().getIndicators().getQuote().addAll(qts);
+                        ticker.setChartLastUpdate(new Date().getTime());
+
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        // TODO: handle exception
+                }
+
                 return ticker;
 
         }

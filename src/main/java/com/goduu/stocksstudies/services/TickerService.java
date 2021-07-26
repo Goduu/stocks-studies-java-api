@@ -113,6 +113,14 @@ public class TickerService {
 				e.printStackTrace();
 			}
 		}
+		if (now - ticker.getChartLastUpdate() > oneDay/24) {
+			try {
+				ticker = updateTickerChart(ticker);
+			} catch (JsonIOException | JsonSyntaxException | io.jsonwebtoken.io.IOException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 
 		return ticker;
 
@@ -146,6 +154,14 @@ public class TickerService {
 			throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
 
 		ticker = dataService.updateTickerSummaryProfile(ticker);
+		return repo.save(ticker);
+
+	}
+	
+	private Ticker updateTickerChart(Ticker ticker)
+			throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
+
+		ticker = dataService.updateTickerChart(ticker);
 		return repo.save(ticker);
 
 	}

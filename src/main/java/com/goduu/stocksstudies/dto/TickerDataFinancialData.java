@@ -32,7 +32,7 @@ public class TickerDataFinancialData implements Serializable {
     private RawDouble returnOnAssets;
     private RawDouble returnOnEquity;
     private RawLong grossProfits;
-    private RawLong freeCashflow;
+    private RawLong freeCashflow;   
     private RawLong operatingCashflow;
     private RawDouble earningsGrowth;
     private RawDouble revenueGrowth;
