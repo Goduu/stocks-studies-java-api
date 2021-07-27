@@ -28,11 +28,11 @@ public class TickerDataChart {
     @Setter
     public static class Quote {
 
-        private List<Double> high;
-        private List<Double> low;
-        private List<Double> volume;
-        private List<Double> open;
-        private List<Double> close;
+        private List<Double> high = new ArrayList<>();
+        private List<Double> low = new ArrayList<>();
+        private List<Double> volume = new ArrayList<>();
+        private List<Double> open = new ArrayList<>();
+        private List<Double> close = new ArrayList<>();
 
     }
 }

@@ -305,7 +305,7 @@ public class StockDataService {
 
         public Ticker updateTickerChart(Ticker ticker)
                         throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
-                Long lastTime = ticker.getChartLastUpdate()/1000;
+                Long lastTime = ticker.getChartLastUpdate() / 1000;
                 Long now = new Date().getTime() / 1000;
                 if (now - lastTime > 2 * 31556926L) {
                         lastTime = now - 2 * 31556926L;
@@ -319,7 +319,20 @@ public class StockDataService {
                         List<Long> ts = resp.getChart().getResult().get(0).getTimestamp();
                         List<Quote> qts = resp.getChart().getResult().get(0).getIndicators().getQuote();
                         ticker.getChart().getTimestamp().addAll(ts);
-                        ticker.getChart().getIndicators().getQuote().addAll(qts);
+                        if (ticker.getChart().getIndicators().getQuote().isEmpty()) {
+                                ticker.getChart().getIndicators().setQuote(qts);
+                        } else {
+                                ticker.getChart().getIndicators().getQuote().get(0).getHigh()
+                                                .addAll(qts.get(0).getHigh());
+                                ticker.getChart().getIndicators().getQuote().get(0).getClose()
+                                                .addAll(qts.get(0).getClose());
+                                ticker.getChart().getIndicators().getQuote().get(0).getLow()
+                                                .addAll(qts.get(0).getLow());
+                                ticker.getChart().getIndicators().getQuote().get(0).getOpen()
+                                                .addAll(qts.get(0).getOpen());
+                                ticker.getChart().getIndicators().getQuote().get(0).getVolume()
+                                                .addAll(qts.get(0).getVolume());
+                        }
                         ticker.setChartLastUpdate(new Date().getTime());
 
                 } catch (Exception e) {
