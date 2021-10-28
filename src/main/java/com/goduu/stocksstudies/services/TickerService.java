@@ -113,9 +113,18 @@ public class TickerService {
 				e.printStackTrace();
 			}
 		}
-		if (now - ticker.getChartLastUpdate() > oneDay/24) {
+		if (now - ticker.getChartLastUpdate() > oneDay / 24) {
 			try {
 				ticker = updateTickerChart(ticker);
+			} catch (JsonIOException | JsonSyntaxException | io.jsonwebtoken.io.IOException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		if (ticker.getSummaryDetail().getExDividendDate() != null && ticker.getSummaryDetail().getExDividendDate().getRaw() != null
+				&& ticker.getDividendLastUpdate()/1000 < ticker.getSummaryDetail().getExDividendDate().getRaw()) {
+			try {
+				ticker = updateTickerDividend(ticker);
 			} catch (JsonIOException | JsonSyntaxException | io.jsonwebtoken.io.IOException | IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -149,7 +158,7 @@ public class TickerService {
 		return repo.save(ticker);
 
 	}
-	
+
 	private Ticker updateTickerSummaryProfile(Ticker ticker)
 			throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
 
@@ -157,11 +166,19 @@ public class TickerService {
 		return repo.save(ticker);
 
 	}
-	
+
 	private Ticker updateTickerChart(Ticker ticker)
 			throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
 
 		ticker = dataService.updateTickerChart(ticker);
+		return repo.save(ticker);
+
+	}
+
+	private Ticker updateTickerDividend(Ticker ticker)
+			throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
+
+		ticker = dataService.updateTickerDividend(ticker);
 		return repo.save(ticker);
 
 	}

@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import com.goduu.stocksstudies.dto.TickerDataChart;
+import com.goduu.stocksstudies.dto.TickerDataDividend;
 import com.goduu.stocksstudies.dto.TickerDataFinancialData;
 import com.goduu.stocksstudies.dto.TickerDataKeyStatistics;
 import com.goduu.stocksstudies.dto.TickerDataSummaryDetail;
@@ -51,11 +52,13 @@ public class Ticker implements Serializable {
 	private TickerDataFinancialData financialData = new TickerDataFinancialData();
 	private TickerDataSummaryProfile summaryProfile = new TickerDataSummaryProfile();
 	private TickerDataChart chart = new TickerDataChart();
+	private TickerDataDividend dividend = new TickerDataDividend();
 
 	private Long keyStatisticsLastUpdate = 0L;
 	private Long summaryDetailsLastUpdate = 0L;
 	private Long financialDataLastUpdate = 0L;
 	private Long summaryProfileLastUpdate = 0L;
 	private Long chartLastUpdate = 0L;
+	private Long dividendLastUpdate = 0L;
 
 }

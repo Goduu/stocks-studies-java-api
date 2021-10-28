@@ -27,5 +27,6 @@ public class TickerDataSummaryDetail implements Serializable {
     private RawDouble twoHundredDayAverage;
     private RawDouble trailingAnnualDividendRate;
     private RawDouble trailingAnnualDividendYield;
+    private RawLong exDividendDate;
 
 }

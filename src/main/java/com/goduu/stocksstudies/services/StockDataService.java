@@ -20,6 +20,7 @@ import com.goduu.stocksstudies.dto.FinancialDTO;
 import com.goduu.stocksstudies.dto.PortifolioElement;
 import com.goduu.stocksstudies.dto.StatsDTO;
 import com.goduu.stocksstudies.dto.StockDataDTO;
+import com.goduu.stocksstudies.dto.TickerDataDividend;
 import com.goduu.stocksstudies.dto.TickerDataChart.Quote;
 import com.goduu.stocksstudies.dto.TickerDataResponseDTO;
 import com.goduu.stocksstudies.dto.WatchlistElementDTO;
@@ -340,6 +341,32 @@ public class StockDataService {
                         // TODO: handle exception
                 }
 
+                return ticker;
+
+        }
+
+        public Ticker updateTickerDividend(Ticker ticker)
+                        throws JsonIOException, JsonSyntaxException, io.jsonwebtoken.io.IOException, IOException {
+                Long lastTime = ticker.getDividendLastUpdate() / 1000;
+                Long now = new Date().getTime() / 1000;
+                // if (now - lastTime > 2 * 31556926L) {
+                // lastTime = now - 2 * 31556926L;
+                // }
+                try {
+                        String uri = "https://query2.finance.yahoo.com/v8/finance/chart/" + ticker.getTicker()
+                                        + "?symbol=" + ticker.getTicker()
+                                        + "&indicators=close&events=div&interval=1mo&period1=" + lastTime + "&period2="
+                                        + now;
+                        TickerDataResponseDTO resp = WebClient.create().get().uri(uri).retrieve()
+                                        .bodyToMono(TickerDataResponseDTO.class).block();
+
+                        TickerDataDividend dividend = new TickerDataDividend(resp);
+                        ticker.setDividend(dividend);
+                        ticker.setDividendLastUpdate(new Date().getTime());
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        // TODO: handle exception
+                }
                 return ticker;
 
         }

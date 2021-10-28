@@ -1,7 +1,9 @@
 package com.goduu.stocksstudies.dto;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +16,7 @@ public class TickerDataChart {
 
     private List<Long> timestamp = new ArrayList<>();
     private ChartIndicators indicators = new ChartIndicators();
+    private Events events = new Events();
 
     @Getter
     @Setter
@@ -35,4 +38,22 @@ public class TickerDataChart {
         private List<Double> close = new ArrayList<>();
 
     }
+
+    @Getter
+    @Setter
+    public static class Events {
+
+        private Map<String, Dividend> dividends = new HashMap<>();
+
+    }
+
+    @Getter
+    @Setter
+    public static class Dividend {
+
+        private Double amount;
+        private Double date;
+
+    }
+
 }
